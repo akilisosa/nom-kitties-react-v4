@@ -2,10 +2,11 @@
 import { useState } from 'react';
 import Navbar from '../components/NavBar';
 import { CharacterSelect } from './components/CharacterSelect';
+import { Character2Select } from './components/Character2Select';
 
 export default function LocalGame() {
   const [player1Color, setPlayer1Color] = useState('#a85c32');
-  const [player2Color, setPlayer2Color] = useState('#a85c32');
+  const [player2Color, setPlayer2Color] = useState('#FFF');
   const [player1Score, setPlayer1Score] = useState(0);
   const [player2Score, setPlayer2Score] = useState(0);
 
@@ -34,7 +35,17 @@ export default function LocalGame() {
           onColorChange={(color) => handleColorChange(color, 'player1')}/>
       </div>
       {/* </main> */}
-    </div>
+ 
+
+     <div className="w-1/4">
+        <Character2Select 
+        
+        player="player2"
+          score={player2Score}
+          onColorChange={(color) => handleColorChange(color, 'player2')}/>
+      </div>
+      {/* </main> */}
+    </div> 
       
       </main>)
   }
