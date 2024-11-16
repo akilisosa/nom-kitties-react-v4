@@ -19,22 +19,19 @@ export const drawKitty = (
     y: number,
     width: number,
     color: string = '#040607',
-    size: number
   ) => {
-    // Scale values
-    // width = getScaledValue(width, size);
-    // x = getScaledValue(x, size);
-    // y = getScaledValue(y, size);
   
     const scale = width / 50; // SVG viewBox is 50x50
     
-    // Save current context state
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(scale, scale);
   
     // Main body outline
     ctx.fillStyle = color;
+    ctx.strokeStyle = 'black'; // Add stroke color
+    ctx.lineWidth = 1; 
+
     ctx.beginPath();
     ctx.moveTo(8.6, 1.52);
     ctx.bezierCurveTo(11, 1.05, 14.3, 6.83, 15.71, 8.51);
@@ -53,6 +50,7 @@ export const drawKitty = (
     ctx.bezierCurveTo(2.45, 11.53, 6.53, 1.93, 8.6, 1.52);
     ctx.closePath();
     ctx.fill();
+    ctx.stroke();
   
     // Restore context state
     ctx.restore();

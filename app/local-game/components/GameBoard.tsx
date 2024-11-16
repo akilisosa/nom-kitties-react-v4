@@ -117,15 +117,11 @@ export function GameBoard({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    
-
     // Set canvas size
     canvas.width = size;
     canvas.height = size;
 
     let animationId: number;
-
-    
 
     const gameLoop = () => {
       const p1 = player1Ref.current;
@@ -171,10 +167,10 @@ export function GameBoard({
 
       // Draw players
     //   ctx.fillStyle = p1.color;
-      drawKitty(ctx, p1.x, p1.y, p1.size, p1.color, size);
+      drawKitty(ctx, p1.x, p1.y, p1.size, p1.color);
 
       ctx.fillStyle = p2.color;
-      drawKitty(ctx, p2.x, p2.y, p2.size, p2.color, size);
+      drawKitty(ctx, p2.x, p2.y, p2.size, p2.color);
      // ctx.fillRect(p2.x, p2.y, p2.width, p2.height);
 
       animationId = requestAnimationFrame(gameLoop);
