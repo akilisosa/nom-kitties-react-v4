@@ -14,26 +14,26 @@ import Link from 'next/link';
 
 Amplify.configure(outputs);
 
-const client = generateClient<Schema>();
+// const client = generateClient<Schema>();
 
 export default function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+  // const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
 
-  function listTodos() {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
-  }
+  // function listTodos() {
+  //   client.models.Todo.observeQuery().subscribe({
+  //     next: (data) => setTodos([...data.items]),
+  //   });
+  // }
 
-  useEffect(() => {
-    listTodos();
-  }, []);
+  // useEffect(() => {
+  //   listTodos();
+  // }, []);
 
-  function createTodo() {
-    client.models.Todo.create({
-      content: window.prompt("Todo content"),
-    });
-  }
+  // function createTodo() {
+  //   client.models.Todo.create({
+  //     content: window.prompt("Todo content"),
+  //   });
+  // }
 
   return (
 <main className="min-h-screen p-8">
