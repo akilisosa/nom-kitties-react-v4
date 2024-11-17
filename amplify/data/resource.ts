@@ -23,6 +23,7 @@ const schema = a.schema({
       gamesPlayed: a.integer(),
       wins: a.integer(),
       losses: a.integer(),
+      owner: a.string().required(),
     })
     .authorization((allow) => [
       // Owner can do all operations
