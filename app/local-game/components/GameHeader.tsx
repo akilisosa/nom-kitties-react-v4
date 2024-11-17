@@ -13,7 +13,8 @@ interface GameHeaderProps {
 export const GameHeader = ({ 
     gameState, 
     initialTime = 300, 
-    onTimeEnd 
+    onTimeEnd,
+    onSettingsClick
   }: GameHeaderProps ) => {
   const [settingsView, setSettingsView] = useState(false);
   const [timer, setTimer] = useState('00:00'); // Add timer logic as needed
@@ -86,7 +87,7 @@ export const GameHeader = ({
       <button 
         className={`bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded
           ${active ? 'opacity-50' : ''}`}
-        onClick={() => setSettingsView(!settingsView)}
+        // onClick={() => onSettingsClick(!settingsView)}
       >
         <p className="text-2xl m-0">
           <FiSettings />
