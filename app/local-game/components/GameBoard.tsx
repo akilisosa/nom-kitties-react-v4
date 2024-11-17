@@ -27,10 +27,11 @@ interface GameBoardProps {
     player1: Player; // Player;
     player2: Player;//Player;
     obstacleList: any[];
+    collectibles: any[];
     onGameTick: () => void;
   }
   
-  export function GameBoard({ size, player1, player2, obstacleList, onGameTick }: GameBoardProps) {
+  export function GameBoard({ size, player1, player2, obstacleList, collectibles, onGameTick }: GameBoardProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const animationFrameId = useRef<number>();
 
@@ -62,6 +63,15 @@ interface GameBoardProps {
                     );
                   });
             
+                  collectibles.forEach(collectible => {
+                    if (collectible.active) {
+                        ctx.beginPath();
+                        ctx.arc(collectible.x, collectible.y, collectible.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = collectible.color;
+                        ctx.fill();
+                        ctx.closePath();
+                    }
+                });
   
         // Draw players
         drawKitty(ctx, player1.x, player1.y, player1.size, player1.color);

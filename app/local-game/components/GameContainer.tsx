@@ -1,6 +1,6 @@
 'use client';
 // components/GameContainer.tsx
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GameBoard } from './GameBoard';
 import { checkCollision, checkObstacleCollisions, getScaledValue } from '../utils/gameUtils';
 
@@ -27,9 +27,24 @@ interface GameContainerProps {
     player1Color: string;
     player2Color: string;
     onScoreChange: (scores: { player1: number; player2: number }) => void;
+    treatsOnFloor: number;
+    initialCollectibles: Collectible[];
 }
 
-export function GameContainer({ size, player1Color, player2Color, onScoreChange }: GameContainerProps) {
+interface Collectible {
+    x: number;
+    y: number;
+    radius: number;
+    color: string;
+    active: boolean;
+}
+
+export function GameContainer({ size, player1Color, player2Color, onScoreChange, treatsOnFloor = 3,   initialCollectibles  }: GameContainerProps) {
+    const COLLECTIBLE_RADIUS = getScaledValue(10, size); // Adjust size as needed
+    const [collectibles, setCollectibles] = useState<Collectible[]>(initialCollectibles);
+    const [scores, setScores] = useState({ player1: 0, player2: 0 });
+    const isInitialized = useRef(false);
+  
     // Player refs for position tracking
     const player1Ref = useRef<Player>({
         x: 0,
@@ -94,43 +109,13 @@ export function GameContainer({ size, player1Color, player2Color, onScoreChange 
             height: getScaledValue(obstacle.height, size),
             color: obstacle.color
         }))
+
+
     , [size, baseObstacles]);
 
 
-//   const obstacles = useRef<Obstacle[]>([
-//     {
-//       x: getScaledValue(200, size),
-//       y: getScaledValue(200, size),
-//       width: getScaledValue(100, size),
-//       height: getScaledValue(20, size),
-//       color: 'gray'
-//     },
-//     {
-//       x: getScaledValue(400, size),
-//       y: getScaledValue(100, size),
-//       width: getScaledValue(20, size),
-//       height: getScaledValue(200, size),
-//       color: 'gray'
-//     },
-//     {
-//       x: getScaledValue(100, size),
-//       y: getScaledValue(400, size),
-//       width: getScaledValue(200, size),
-//       height: getScaledValue(20, size),
-//       color: 'gray'
-//     }
-//   ]);
+    
 
-    // Add an effect to update obstacle sizes when the game size changes
-// useEffect(() => {
-//     obstacles.current = obstacles.current.map(obstacle => ({
-//       ...obstacle,
-//       x: getScaledValue(obstacle.x, size),
-//       y: getScaledValue(obstacle.y, size),
-//       width: getScaledValue(obstacle.width, size),
-//       height: getScaledValue(obstacle.height, size),
-//     }));
-//   }, [size]);
 
     // Keyboard state tracking
     const keysRef = useRef<{ [key: string]: boolean }>({});
@@ -157,12 +142,168 @@ export function GameContainer({ size, player1Color, player2Color, onScoreChange 
     // Track the animation frame ID
     const animationFrameId = useRef<number>();
 
+        // Initialize collectibles when component mounts
+        useEffect(() => {
+      
+            // Initial spawn of collectibles
+            const initialCollectibles = [];
+
+            // initialCollectibles.push({
+            //     x: player1Ref.current.size, // Just to the right of player 1
+            //     y: player1Ref.current.size + 2, 
+            //     radius: COLLECTIBLE_RADIUS,
+            //     color: 'yellow',
+            //     active: true
+            // });
+    
+            // Place second collectible near player 2's starting position
+            initialCollectibles.push({
+                x: size - player2Ref.current.size, // Just to the left of player 2
+                y: player2Ref.current.size + 10,
+                radius: COLLECTIBLE_RADIUS,
+                color: 'yellow',
+                active: true
+            });
+            // console.log('treatsOnFloor:', treatsOnFloor);
+            for (let i = 1; i < treatsOnFloor; i++) {
+                const position = generateRandomPosition();
+                initialCollectibles.push({
+                    x: position.x,
+                    y: position.y,
+                    radius: COLLECTIBLE_RADIUS,
+                    color: 'yellow',
+                    active: true
+                });
+            }
+            setCollectibles(initialCollectibles);
+            // isInitialized.current = true;
+        // }
+        }, [treatsOnFloor]);
+    
+        
+
+const generateRandomPosition = (): { x: number, y: number } => {
+    let position: any;
+    let validPosition = false;
+  
+    while (!validPosition) {
+        position = {
+            x: Math.random() * (size - 2 * COLLECTIBLE_RADIUS) + COLLECTIBLE_RADIUS,
+            y: Math.random() * (size - 2 * COLLECTIBLE_RADIUS) + COLLECTIBLE_RADIUS
+        };
+  
+        // Check if position DOESN'T overlap with any obstacles
+        validPosition = !scaledObstacles.some(obstacle =>
+            position.x + COLLECTIBLE_RADIUS > obstacle.x &&
+            position.x - COLLECTIBLE_RADIUS < obstacle.x + obstacle.width &&
+            position.y + COLLECTIBLE_RADIUS > obstacle.y &&
+            position.y - COLLECTIBLE_RADIUS < obstacle.y + obstacle.height
+        );
+    }
+  
+    return position;
+}
+
+
+
+    const spawnCollectible = useCallback(() => {
+        if (collectibles.length < treatsOnFloor) {
+            const position = generateRandomPosition();
+            setCollectibles(prev => [...prev, {
+                x: position.x,
+                y: position.y,
+                radius: COLLECTIBLE_RADIUS,
+                color: 'yellow',
+                active: true
+            }]);
+        }
+    }, [collectibles.length, treatsOnFloor, COLLECTIBLE_RADIUS]);
+    
+
+    useEffect(() => {
+        // Reset and regenerate collectibles when size changes
+        const newCollectibles = [];
+        for (let i = 0; i < treatsOnFloor; i++) {
+            const position = generateRandomPosition();
+            newCollectibles.push({
+                x: position.x,
+                y: position.y,
+                radius: COLLECTIBLE_RADIUS,
+                color: 'yellow',
+                active: true
+            });
+        }
+        setCollectibles(newCollectibles);
+    }, [size, COLLECTIBLE_RADIUS, treatsOnFloor, scaledObstacles]);
+      // Keep the size change effect
+//   useEffect(() => {
+//     if (isInitialized.current) {
+//       setCollectibles(prevCollectibles => {
+//         const newCollectibles = [];
+//         for (let i = 0; i < treatsOnFloor; i++) {
+//           const position = generateRandomPosition();
+//           newCollectibles.push({
+//             x: position.x,
+//             y: position.y,
+//             radius: COLLECTIBLE_RADIUS,
+//             color: 'yellow',
+//             active: true
+//           });
+//         }
+//         return newCollectibles;
+//       });
+//     }
+//   }, [size]);
+
+  useEffect(() => {
+    if (isInitialized.current && collectibles.length < treatsOnFloor) {
+      spawnCollectible();
+    }
+  }, [collectibles.length, treatsOnFloor]);
+
+
+    // Add a separate effect to handle spawning new collectibles
+useEffect(() => {
+    if (collectibles.length < treatsOnFloor) {
+
+        spawnCollectible();
+    }
+}, [collectibles.length, size, treatsOnFloor, scaledObstacles]);
+
+    const checkCollectibleCollection = useCallback((player: Player, isPlayer1: boolean) => {
+        setCollectibles(prevCollectibles => {
+            const newCollectibles = prevCollectibles.map(collectible => {
+                if (!collectible.active) return collectible;
+               
+                const dx = (player.x + player.size / 2) - collectible.x;
+                const dy = (player.y + player.size / 2) - collectible.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+    
+                if (distance < (player.size / 2 + collectible.radius)) {
+                    // Update scores in a separate effect
+                    setScores(prev => {
+                        const newScores = isPlayer1 
+                            ? { ...prev, player1: prev.player1 + 1 }
+                            : { ...prev, player2: prev.player2 + 1 };
+                        onScoreChange(newScores);
+                        return newScores;
+                    });
+                    return { ...collectible, active: false };
+                }
+                return collectible;
+            });
+    
+            // Filter out inactive collectibles
+            return newCollectibles.filter(c => c.active);
+        });
+    }, [onScoreChange]);
+    // initialize collectibles
 
     // Game logic
     const handleGameTick = useCallback(() => {
         const p1 = player1Ref.current;
         const p2 = player2Ref.current;
-        console.log('Player 1:', p1);
+        // console.log('Player 1:', p1);
         const keys = keysRef.current;
 
         //  Calculate potential new positions
@@ -187,7 +328,11 @@ export function GameContainer({ size, player1Color, player2Color, onScoreChange 
             p2.y = Math.max(0, Math.min(newP2Y, size - p2.size));
         }
 
-    }, [size, scaledObstacles]);
+         // Check for collectible collection
+         checkCollectibleCollection(p1, true);
+         checkCollectibleCollection(p2, false);
+
+    }, [size, scaledObstacles, checkCollectibleCollection]);
 
     // Update player colors when they change
     useEffect(() => {
@@ -195,12 +340,14 @@ export function GameContainer({ size, player1Color, player2Color, onScoreChange 
         player2Ref.current.color = player2Color;
     }, [player1Color, player2Color]);
 
+    // console.log('collectibles:', collectibles);
     return (
         <GameBoard
             size={size}
             player1={player1Ref.current}
             player2={player2Ref.current}
             obstacleList={scaledObstacles}
+            collectibles={collectibles}
             onGameTick={handleGameTick}
         />
     );

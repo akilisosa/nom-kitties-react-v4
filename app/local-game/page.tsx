@@ -6,6 +6,7 @@ import { CharacterSelect } from "./components/CharacterSelect";
 import { GameContainer } from "./components/GameContainer";
 import { useGameSize } from "./hooks/useGameSize";
 import { useScreenSize } from "./hooks/useScreenSize";
+import { getScaledValue } from "./utils/drawUtils";
 
 // local-game.tsx (parent component)
 export default function LocalGame() {
@@ -15,6 +16,27 @@ export default function LocalGame() {
   const [player2Score, setPlayer2Score] = useState(0);
   const gameSize = useGameSize();
   const isLargeScreen = useScreenSize();
+
+  const initialCollectibles = [
+    {
+      x: getScaledValue(100, gameSize), // or whatever initial position you want for player 1
+      y:  getScaledValue(50, gameSize),
+      radius: getScaledValue(10, gameSize), // or whatever COLLECTIBLE_RADIUS value you're using
+      color: 'yellow',
+      active: true
+    },
+    {
+      x: getScaledValue(500, gameSize), // or whatever initial position you want for player 2
+      y: getScaledValue(50, gameSize),
+      radius:  getScaledValue(10, gameSize),
+      color: 'yellow',
+      active: true
+    }
+  ];
+
+  console.log('initialCollectibles', initialCollectibles);
+
+
 
   const handleScoreChange = ({ player1, player2 }: { player1: number; player2: number }) => {
     setPlayer1Score(player1);
@@ -41,7 +63,9 @@ export default function LocalGame() {
               size={gameSize}
               player1Color={player1Color}
               player2Color={player2Color}
+              treatsOnFloor={3}
               onScoreChange={handleScoreChange}
+              initialCollectibles={initialCollectibles}
             />
           </div>
 
