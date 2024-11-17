@@ -14,6 +14,30 @@ export const checkCollision = (obj1: any, obj2: any, size: number): boolean => {
 
 };
 
+
+export const generateRandomPosition = (obstacles: any[], collectableRadius: number, size: number): { x: number, y: number, } => {
+  let position: any;
+  let validPosition = false;
+
+
+  while (!validPosition) {
+    position = {
+      x: Math.random() * (size - 2 * collectableRadius) + collectableRadius,
+      y: Math.random() * (size - 2 * collectableRadius) + collectableRadius
+    };
+
+    // Check if position overlaps with any obstacles
+    validPosition = obstacles.some(obstacle =>
+      position.x + collectableRadius > obstacle.x &&
+      position.x - collectableRadius < obstacle.x + obstacle.width &&
+      position.y + collectableRadius > obstacle.y &&
+      position.y - collectableRadius < obstacle.y + obstacle.height
+    );
+  }
+
+  return position;
+}
+
 const checkcollideWithObstacle = (obj: any, obstacle: any, size: number): boolean => {
   const scaledObj = {
     x: obj.x,

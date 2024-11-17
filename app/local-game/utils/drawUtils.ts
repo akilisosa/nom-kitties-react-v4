@@ -1,11 +1,6 @@
 // utils/drawUtils.ts
 
-interface Obstacle {
-  x: number;
-  y: number;
-  width: number;
-  color?: string;
-}
+
 
 export const getScaledValue = (originalValue: number, size: number): number => {
     const scaleFactor = size / 600;
@@ -21,6 +16,10 @@ export const drawKitty = (
     color: string = '#040607',
   ) => {
   
+    // x = getScaledValue(x, 600);
+    // y = getScaledValue(y, 600);
+    // width = getScaledValue(width, 600);
+
     const scale = width / 50; // SVG viewBox is 50x50
     
     ctx.save();
@@ -57,35 +56,7 @@ export const drawKitty = (
   };
 
 
-  export const drawObstacle = (
-    ctx: CanvasRenderingContext2D,
-    obstacle: Obstacle,
-    size: number
-  ) => {
-    const scaledWidth = getScaledValue(obstacle.width, size);
-    
-    ctx.save();
-    ctx.fillStyle = obstacle.color || '#666666';
-    
-    // Add some visual interest - maybe rounded corners
-    ctx.beginPath();
-    ctx.roundRect(
-      obstacle.x,
-      obstacle.y,
-      scaledWidth,
-      scaledWidth,
-      10 // radius for rounded corners
-    );
-    ctx.fill();
-    
-    // Add some simple decoration
-    ctx.strokeStyle = '#555555';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    
-    ctx.restore();
-  };
-  
+ 
 
   
   
