@@ -1,5 +1,5 @@
 'use client';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../components/NavBar";
 import { Character2Select } from "./components/Character2Select";
 import { CharacterSelect } from "./components/CharacterSelect";
@@ -7,9 +7,14 @@ import { GameContainer } from "./components/GameContainer";
 import { useGameSize } from "./hooks/useGameSize";
 import { useScreenSize } from "./hooks/useScreenSize";
 import { getScaledValue } from "./utils/drawUtils";
+import { GameHeader }  from "./components/GameHeader";
+import { GameOverlay } from "./components/GameOverlay";
 
 // local-game.tsx (parent component)
 export default function LocalGame() {
+  const [gameState, setGameState] = useState<'idle' | 'running' | 'paused'>('idle');
+  const [isGameStarted, setIsGameStarted] = useState(false);
+  const [settingsView, setSettingsView] = useState(false);
   const [player1Color, setPlayer1Color] = useState('#a85c32');
   const [player2Color, setPlayer2Color] = useState('#FFF');
   const [player1Score, setPlayer1Score] = useState(0);
@@ -34,9 +39,44 @@ export default function LocalGame() {
     }
   ];
 
-  console.log('initialCollectibles', initialCollectibles);
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if(settingsView) return;
+      if (event.code === 'Space' && !isGameStarted) {
+        if (gameState === 'idle') {
+          setGameState('running');
+        } else if (gameState === 'running') {
+          setGameState('paused');
+        } else if (gameState === 'paused') {
+          setGameState('running');
+        }
+      }
+    };
 
+    window.addEventListener('keydown', handleKeyPress);
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [isGameStarted]);
 
+  const handleTimeEnd = () => {
+    console.log('Game Over!');
+    setGameState('idle');
+    // Reset scores
+    // setPlayer1Score(0);
+    // setPlayer2Score(0);
+  };
+
+  const handleStart = () => {
+    setGameState('running');
+    setPlayer1Score(0);
+    setPlayer2Score(0);
+    // setPlayer2Score(0);
+  };
+
+  const handleSettings = () => {
+    setSettingsView(true);
+  };
 
   const handleScoreChange = ({ player1, player2 }: { player1: number; player2: number }) => {
     setPlayer1Score(player1);
@@ -47,6 +87,12 @@ export default function LocalGame() {
     <main>
       <div className="min-h-screen">
         <Navbar title="Local Game" />
+        <GameHeader 
+          gameState={gameState}
+         initialTime={5} // 5 minutes
+         onTimeEnd={handleTimeEnd}
+         onSettingsClick={() => setSettingsView(true)}
+         />
         <div className="flex justify-between items-start gap-4 p-4">
           {isLargeScreen && (
             <div className="w-1/4">
@@ -59,14 +105,25 @@ export default function LocalGame() {
           )}
 
           <div className="flex-1 flex justify-center">
-            <GameContainer
-              size={gameSize}
-              player1Color={player1Color}
-              player2Color={player2Color}
-              treatsOnFloor={3}
-              onScoreChange={handleScoreChange}
-              initialCollectibles={initialCollectibles}
-            />
+          {gameState === 'idle' ? (
+             <GameOverlay 
+             player1Score={player1Score}
+             player2Score={player2Score}
+             showPressSpace={true}
+             className="transition-all duration-300 hover:bg-gray-700"
+             onStart={handleStart}
+             settingsView={settingsView}
+           />
+            ) : (
+              <GameContainer
+                size={gameSize}
+                player1Color={player1Color}
+                player2Color={player2Color}
+                treatsOnFloor={3}
+                onScoreChange={handleScoreChange}
+                initialCollectibles={initialCollectibles}
+              />
+            )}
           </div>
 
           {isLargeScreen && (
