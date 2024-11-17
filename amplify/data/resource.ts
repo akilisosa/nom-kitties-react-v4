@@ -57,6 +57,7 @@ const schema = a.schema({
       winner: a.string(),
 
       // standard
+      owner: a.string().required(),
       createdAt: a.datetime(),
     })
     .secondaryIndexes((index) => [

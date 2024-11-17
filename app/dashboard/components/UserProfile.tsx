@@ -97,14 +97,8 @@ export default function UserProfile() {
         // Create new user
         console.log('creating user')
         const response = await client.models.User.create(
-          {...data},
-          { 
-            headers: async (requestOptions) => {
-              return {
-                authMode: 'AMAZON_COGNITO_USER_POOLS',
-              };
-            },
-          }
+          {...data,
+          owner: currentUser.userId}
         );
         dispatch(setUser(response.data));
       }

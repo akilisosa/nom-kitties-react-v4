@@ -20,7 +20,9 @@ export default function AuthPage() {
     e.preventDefault();
     try {
       await signIn({ username: email, password });
+      
       // redirect to dashboard
+      console.log('signed in')
       router.push('/dashboard');
 
     } catch (error) {
