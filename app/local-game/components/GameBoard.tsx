@@ -32,6 +32,8 @@ interface GameBoardProps {
   
   export function GameBoard({ size, player1, player2, obstacleList, onGameTick }: GameBoardProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const animationFrameId = useRef<number>();
+
   
     useEffect(() => {
       const canvas = canvasRef.current;
@@ -39,6 +41,10 @@ interface GameBoardProps {
   
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
+
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+    }
   
       const gameLoop = () => {
         // Clear and draw background
@@ -62,12 +68,18 @@ interface GameBoardProps {
         drawKitty(ctx, player2.x, player2.y, player2.size, player2.color);
   
         onGameTick();
-        requestAnimationFrame(gameLoop);
+       // requestAnimationFrame(gameLoop);
+        animationFrameId.current = requestAnimationFrame(gameLoop);
       };
   
-      const animationId = requestAnimationFrame(gameLoop);
-      return () => cancelAnimationFrame(animationId);
-    }, [size, player1, player2, onGameTick]);
+      animationFrameId.current = requestAnimationFrame(gameLoop);
+   // Cleanup function
+   return () => {
+    if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+    }
+};
+    }, [size, player1, player2, obstacleList, onGameTick]);
   
     return (
       <canvas
