@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn, signUp, confirmSignUp, signOut, getCurrentUser } from 'aws-amplify/auth';
+import { signIn, signUp, confirmSignUp } from 'aws-amplify/auth';
 
 import { useRouter } from 'next/navigation';  // Add this import
 
@@ -95,7 +95,7 @@ export default function AuthPage() {
         Don't have an account?{' '}
         <button
           type="button"
-          onClick={() => setAuthState('signUp')}
+          onClick={() => {setAuthState('signUp'); setError('')} }
           className="text-indigo-600 hover:text-indigo-500"
         >
           Sign Up
@@ -137,7 +137,7 @@ export default function AuthPage() {
         Already have an account?{' '}
         <button
           type="button"
-          onClick={() => setAuthState('signIn')}
+          onClick={() => {setAuthState('signIn'); setError('')} }
           className="text-indigo-600 hover:text-indigo-500"
         >
           Sign In

@@ -2,7 +2,7 @@
 import Navbar from "../components/NavBar";
 import ProtectedRoute from "../components/ProtectedRoute";
 import UserProfile from "./components/UserProfile";
-import QuickStart from "./QuickStart";
+import QuickStart from "./components/QuickStart";
 
 export default function Dashboard() {
   return (

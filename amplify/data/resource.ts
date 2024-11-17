@@ -32,6 +32,7 @@ const schema = a.schema({
       allow.publicApiKey().to(['read']),
     ]),
 
+    // ROOM
     Room: a
     .model({
       name: a.string().required(),
