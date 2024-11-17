@@ -23,8 +23,6 @@ const schema = a.schema({
       gamesPlayed: a.integer(),
       wins: a.integer(),
       losses: a.integer(),
-      createdAt: a.datetime(),
-      updatedAt: a.datetime(),
     })
     .authorization((allow) => [
       // Owner can do all operations
@@ -54,13 +52,12 @@ const schema = a.schema({
 
       spectators: a.string().array(),
       currentRound: a.integer(),
-      turn: a.string().required(),
-      moves: a.string().required(),
-      winner: a.string().required(),
+      turn: a.string(),
+      moves: a.string(),
+      winner: a.string(),
 
       // standard
       createdAt: a.datetime(),
-      updatedAt: a.datetime(),
     })
     .secondaryIndexes((index) => [
       index('public').sortKeys(['createdAt']),
@@ -83,7 +80,7 @@ export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: "apiKey",
+    defaultAuthorizationMode: "userPool",
     apiKeyAuthorizationMode: {
       expiresInDays: 30,
     },

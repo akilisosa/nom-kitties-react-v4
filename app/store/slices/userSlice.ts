@@ -1,7 +1,9 @@
 // store/slices/userSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface User {
+interface User 
+
+{
   id?: string;
   owner?: string;
   name: string;
@@ -10,7 +12,7 @@ interface User {
 }
 
 interface UserState {
-  user: User | null;
+  user: User | null | undefined;
   loading: boolean;
   error: string | null;
 }
@@ -25,7 +27,8 @@ export const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setUser: (state, action: PayloadAction<User>) => {
+    // setUser: (state, action: PayloadAction<User>) => {
+    setUser: (state, action: PayloadAction<any>) => {
       state.user = action.payload;
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
