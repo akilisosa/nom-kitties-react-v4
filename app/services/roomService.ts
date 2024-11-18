@@ -2,7 +2,7 @@ import { generateClient } from "aws-amplify/api";
 import { type Schema } from '../../amplify/data/resource' 
 import { getCurrentUser } from "aws-amplify/auth";
 
-export type RoomStatus = 'WAITING' | 'PLAYING' | 'FINISHED' | 'CANCELLED';
+export type RoomStatus = 'WAITING' | 'PLAYING' | 'FINISHED' | 'CANCELLED' | null;
 export class RoomStatusEnum {
   static WAITING = 'WAITING' as RoomStatus;
   static PLAYING = 'PLAYING' as RoomStatus;

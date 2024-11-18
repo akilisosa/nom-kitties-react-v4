@@ -21,7 +21,7 @@ const roomSlice = createSlice({
   name: 'room',
   initialState,
   reducers: {
-    setCurrentRoom: (state, action: PayloadAction<Room | null>) => {
+    setCurrentRoom: (state, action: PayloadAction<Room | any>) => {
       state.currentRoom = action.payload;
     },
     setRooms: (state, action: PayloadAction<Room[]>) => {

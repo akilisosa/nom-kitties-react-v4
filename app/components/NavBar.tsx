@@ -65,6 +65,20 @@ export default function Navbar({ title }: { title: string }) {
             >
               Dashboard
             </Link>
+
+            <Link
+              href="/online-game"
+              className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
+            >
+              Play Online
+            </Link>
+
+            <Link
+              href="/online-game"
+              className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
+            >
+              Feline Forum
+            </Link>
             <Link
               href="/local-game"
               className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
