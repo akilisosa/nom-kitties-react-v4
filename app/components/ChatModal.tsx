@@ -5,14 +5,19 @@ import { useAppDispatch, useAppSelector } from '../store/store';
 import { CreateMessageInput, messageService } from '../services/messageService';
 import { setMessages } from '../store/slices/messageSlice';
 import { getCurrentUser } from 'aws-amplify/auth';
-import { generateClient } from 'aws-amplify/api';
+import { generateClient } from 'aws-amplify/data';
 import { Schema } from '@/amplify/data/resource';
+import { userService } from '../services/userService';
+import { setUser } from '../store/slices/userSlice';
 interface ChatModalProps {
   isOpen: boolean;
   roomID: string;
   onClose: () => void;
 }
 
+ type Message = Schema['Message']['type'];
+
+const client = generateClient<Schema>({ authMode: 'apiKey' });
 export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -20,12 +25,12 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
   const messages = useAppSelector((state) => state.message.messages);
- // const currentUser = useAppSelector((state) => state.auth.user); // Assuming you have auth slice
+  const user = useAppSelector((state) => state.user.user); // Assuming you have auth slice
 
 
- // useEffect 
+  // useEffect 
 
- console.log("roomID", roomID);
+  console.log("roomID", roomID);
   useEffect(() => {
     if (isOpen) {
       setIsAnimating(true);
@@ -33,29 +38,43 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
     }
   }, [isOpen]);
 
+  // useEffect(() => {
+  //   // Subscribe to new messages
+  //    const sub = client.models.Message
+  //    .observeQuery({
+  //     filter: {
+  //       roomID: { eq: roomID },
+  //     },
+  //   }).subscribe({
+  //     next: (data) => {
+  //       console.log('New messages:', data);
+  //       dispatch(setMessages(data.items));
+  //       scrollToBottom();
+  //     },
+  //     error: (err) => console.error('Error in subscription:', err),
+  //   }) 
+
+  //    return () => sub.unsubscribe();
+  // }, [roomID]);
+
   useEffect(() => {
-    const client = generateClient<Schema>({authMode: 'apiKey'});
-    // Subscribe to new messages
-    const sub = client.models.Message.observeQuery({
-      filter: { roomID: { eq: roomID } },
-    }).subscribe({
-      next: ({ items }) => {
-        console.log('New messages:', items);
-        dispatch(setMessages(items));
-        scrollToBottom();
-      },
-    });
+    if(!user) {
+      getUser();
+    }
+  })
 
-    return () => sub.unsubscribe();
-  }, [roomID]);
+  // util functions 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
- // util functions 
- const scrollToBottom = () => {
-  messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-};
+  const getUser = async () => {
+    const { userId: owner } = await getCurrentUser()
+    const response = await userService.getUserByOwner(owner);
+    dispatch(setUser(response.data[0]));
+  }
 
-
- const loadInitialMessages = async () => {
+  const loadInitialMessages = async () => {
     try {
       const fetchedMessages = (await messageService.getMessagesByRoomId(roomID)).data;
       dispatch(setMessages(fetchedMessages || []));
@@ -68,7 +87,7 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
 
-    const { userId: owner }  = await getCurrentUser()
+    const { userId: owner } = await getCurrentUser()
 
     try {
       const messageInput: CreateMessageInput = {
@@ -79,10 +98,10 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
         name: 'kittycat' //currentUser.name,
       };
 
-      const newMess =  (await  messageService.createNewMessage(messageInput)).data;
-      if(!newMess) return;
-      messages.push(newMess);
-      dispatch(setMessages(messages));
+      await messageService.createNewMessage(messageInput);
+      // if(!newMess) return;
+      // messages.push(newMess);
+      // dispatch(setMessages(messages));
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
@@ -101,11 +120,11 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
   if (!isOpen && !isAnimating) return null;
 
   return (
-    <div 
+    <div
       className={`fixed inset-0 z-50 transform transition-all
         ${isOpen ? 'translate-y-0 opacity-100 duration-500 ease-in-out' : 'translate-y-full opacity-100 duration-500 ease-in-out'}`}
-    // TODO ask about transitions
-        onTransitionEnd={() => {
+      // TODO ask about transitions
+      onTransitionEnd={() => {
         if (!isOpen) setIsAnimating(false);
       }}
     >
@@ -121,18 +140,18 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
           >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-6 w-6 text-gray-600" 
-              fill="none" 
-              viewBox="0 0 24 24" 
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-gray-600"
+              fill="none"
+              viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M6 18L18 6M6 6l12 12" 
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
               />
             </svg>
           </button>
