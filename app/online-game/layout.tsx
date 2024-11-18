@@ -5,10 +5,9 @@ export default function GameLayout({
   }) {
     return (
       <div>
-        <nav>Game Navigation</nav>
+        {/* <nav>Game Navigation</nav> */}
         {children}
       </div>
     )
   }
 
-  
