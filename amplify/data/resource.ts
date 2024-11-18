@@ -25,6 +25,9 @@ const schema = a.schema({
       losses: a.integer(),
       owner: a.string().required(),
     })
+    .secondaryIndexes((index) => [
+      index('owner'),
+    ])
     .authorization((allow) => [
       // Owner can do all operations
       allow.owner(),

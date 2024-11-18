@@ -7,39 +7,43 @@ export enum ModelSortDirection {
   DESC = "DESC",
 }
 
-export type CreateMessageInput = Omit<Message, 'id' | 'createdAt'>;
+export type CreateUserInput = Omit<User, 'id' | 'createdAt'>;
 
-export type UpdateMessageInput = Omit<Message, 'createdAt'>;
+export type UpdateUserInput = Omit<User, 'createdAt'>;
 
-export interface Message {
+export interface User {
     id: string;
-    content: string;
-    owner: string;
-    roomID: string 
-    createdAt: string;
-    color: string;
     name: string;
+    color: string;
+    type: string | null;
+    score: number | null;
+    gamesPlayed: number | null;
+    wins: number | null;
+    losses: number | null;
+    owner: string;
   }
 
 
-export const messageService = {
-    getMessagesByRoomId: async (roomID: string) => {
+export const userService = {
+    getUserByOwner: async (owner: string) => {
         const client = generateClient<Schema>({authMode: 'apiKey'});
-        return await client.models.Message.listMessageByRoomIDAndCreatedAt({
-            roomID,
+        return await client.models.User.listUserByOwner({
+            owner,
         }, {
-            limit: 20,
-            sortDirection: ModelSortDirection.DESC,
+            limit: 1,
         });
     },
-
-    createNewMessage: async (message: CreateMessageInput) => {
+    createUser: async (user: CreateUserInput) => {
         const client = generateClient<Schema>({authMode: 'userPool'});
         const { userId: owner } = await getCurrentUser()
-        return await client.models.Message.create({
-            ...message,
-            createdAt: new Date().toISOString(),
+        return await client.models.User.create({
+            ...user,
             owner,
         });
     },
+    updateUser: async (user: UpdateUserInput) => {
+        const client = generateClient<Schema>({authMode: 'userPool'});
+        return await client.models.User.update(user);
+    },
 }
+

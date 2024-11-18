@@ -8,7 +8,7 @@ import { getCurrentUser } from 'aws-amplify/auth';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setUser, setLoading, setError } from '../../store/slices/userSlice';
 import { Schema } from '@/amplify/data/resource';
-
+import { userService } from '../../services/userService';
 
 type User = any // Schema['User'];
 
@@ -45,13 +45,7 @@ export default function UserProfile() {
     dispatch(setLoading(true));
     try {
       const currentUser = await getCurrentUser();
-      const response = await client.models.User.list({
-        filter: {
-          owner: {
-            eq: currentUser.userId
-          }
-        }
-      });
+      const response = await userService.getUserByOwner(currentUser.userId);
 
       if (response.data[0]) {
         dispatch(setUser(response.data[0]));
@@ -71,7 +65,7 @@ export default function UserProfile() {
 
       if (user?.id) {
         // Update existing user
-        const response = await client.models.User.update({
+        const response = await userService.updateUser({
           ...data,
           id: user.id,
         });
@@ -83,7 +77,7 @@ export default function UserProfile() {
       } else {
         // Create new user
         console.log('creating user')
-        const response = await client.models.User.create(
+        const response = await userService.createUser(
           {
             ...data,
             owner: currentUser.userId
