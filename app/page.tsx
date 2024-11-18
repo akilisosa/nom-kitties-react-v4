@@ -25,6 +25,24 @@ export default function App() {
     });
   }
 
+//   useEffect(() => {
+//   const sub = client.models.Message
+//   .observeQuery({
+//    filter: {
+//      roomID: { eq: '123' },
+//    },
+//  }).subscribe({
+//    next: (data) => {
+//      console.log('New messages:', data);
+//     //  dispatch(setMessages(data.items));
+//     //  scrollToBottom();
+//    },
+//    error: (err) => console.error('Error in subscription:', err),
+//  }) 
+
+//   return () => sub.unsubscribe();
+// }, []);
+
   useEffect(() => {
     listTodos();
   }, []);

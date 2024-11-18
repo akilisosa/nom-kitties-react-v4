@@ -9,6 +9,9 @@ import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
 import { userService } from '../services/userService';
 import { setUser } from '../store/slices/userSlice';
+import { Amplify } from "aws-amplify";
+import outputs from "@/amplify_outputs.json";
+
 interface ChatModalProps {
   isOpen: boolean;
   roomID: string;
@@ -16,6 +19,8 @@ interface ChatModalProps {
 }
 
  type Message = Schema['Message']['type'];
+
+ Amplify.configure(outputs);
 
 const client = generateClient<Schema>({ authMode: 'apiKey' });
 export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
@@ -38,24 +43,48 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    // Subscribe to new messages
-     const sub = client.models.Message
-     .observeQuery({
+  function listTodos() {
+    client.models.Todo.observeQuery().subscribe({
+      next: (data) => console.log([...data.items]),
+    });
+  }
+
+  function listMessages() {
+    client.models.Message.observeQuery({
       filter: {
         roomID: { eq: roomID },
       },
     }).subscribe({
-      next: (data) => {
-        console.log('New messages:', data);
-        dispatch(setMessages(data.items));
-        scrollToBottom();
-      },
-      error: (err) => console.error('Error in subscription:', err),
-    }) 
+      next: (data) => console.log([...data.items]),
+    });
+  }
+  
 
-     return () => sub.unsubscribe();
+  useEffect(() => {
+    if (roomID) {
+      listMessages();
+    }
   }, [roomID]);
+
+
+  // useEffect(() => {
+  //   // Subscribe to new messages
+  //    const sub = client.models.Message
+  //    .observeQuery({
+  //     filter: {
+  //       roomID: { eq: roomID },
+  //     },
+  //   }).subscribe({
+  //     next: (data) => {
+  //       console.log('New messages:', data);
+  //       dispatch(setMessages(data.items));
+  //       scrollToBottom();
+  //     },
+  //     error: (err) => console.error('Error in subscription:', err),
+  //   }) 
+
+  //    return () => sub.unsubscribe();
+  // }, [roomID]);
 
   useEffect(() => {
     if(!user) {

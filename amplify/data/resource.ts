@@ -7,14 +7,36 @@ specifies that any user authenticated via an API key can "create", "read",
 "update", and "delete" any "Todo" records.
 =========================================================================*/
 const schema = a.schema({
+
+  // message 
+  Message: a.
+    model({
+      content: a.string().required(),
+      owner: a.string().required(),
+      roomID: a.string().required(),
+      createdAt: a.datetime().required(),
+      color: a.string().required(),
+      name: a.string().required(),
+    })
+    .authorization((allow) => [allow.publicApiKey()]),
+    // .secondaryIndexes((index) => [
+    //   index('roomID').sortKeys(['createdAt']),
+    // ])
+    // .authorization((allow) => [
+    //   // Owner can do all operations
+    //   allow.owner(),
+    //   // Public can read
+    //   allow.publicApiKey().to(['create', 'read']),
+    // ]),
+
   Todo: a
     .model({
       content: a.string(),
     })
     .authorization((allow) => [allow.publicApiKey()]),
 
-    // USER
-    User: a
+  // USER
+  User: a
     .model({
       name: a.string().required(),
       color: a.string().required(),
@@ -35,8 +57,8 @@ const schema = a.schema({
       allow.publicApiKey().to(['read']),
     ]),
 
-    // ROOM
-    Room: a
+  // ROOM
+  Room: a
     .model({
       name: a.string().required(),
       status: a.enum(['WAITING', 'PLAYING', 'FINISHED', 'CANCELLED']),
@@ -50,12 +72,12 @@ const schema = a.schema({
       full: a.boolean(),
       players: a.string().array()
         .authorization(
-          (allow) => [allow.owner(), 
-                      allow.authenticated().to(['read', 'update']),
-                      allow.publicApiKey().to(['read', 'update'])],
-          ),
+          (allow) => [allow.owner(),
+          allow.authenticated().to(['read', 'update']),
+          allow.publicApiKey().to(['read', 'update'])],
+        ),
 
-          
+
       spectators: a.string().array(),
       currentRound: a.integer(),
       winner: a.string(),
@@ -77,27 +99,9 @@ const schema = a.schema({
       allow.publicApiKey().to(['read']),
     ]),
 
-    // message 
-    Message: a.
-    model({
-      content: a.string().required(),
-      owner: a.string().required(),
-      roomID: a.string().required(),
-      createdAt: a.datetime().required(),
-      color: a.string().required(),
-      name: a.string().required(),
-    })
-    .secondaryIndexes((index) => [
-      index('roomID').sortKeys(['createdAt']),
-    ])
-    .authorization((allow) => [
-      // Owner can do all operations
-      allow.owner(),
-      // Public can read
-      allow.publicApiKey().to(['create','read']),
-    ]),
-    
-  
+
+
+
 });
 
 export type Schema = ClientSchema<typeof schema>;
@@ -117,7 +121,7 @@ Go to your frontend source code. From your client-side code, generate a
 Data client to make CRUDL requests to your table. (THIS SNIPPET WILL ONLY
 WORK IN THE FRONTEND CODE FILE.)
 
-Using JavaScript or Next.js React Server Components, Middleware, Server 
+Using JavaScript or Next.js React Server Components, Middleware, Server
 Actions or Pages Router? Review how to generate Data clients for those use
 cases: https://docs.amplify.aws/gen2/build-a-backend/data/connect-to-API/
 =========================================================================*/
