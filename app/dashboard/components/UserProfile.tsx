@@ -8,7 +8,7 @@ import { getCurrentUser } from 'aws-amplify/auth';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setUser, setLoading, setError } from '../../store/slices/userSlice';
 import { Schema } from '@/amplify/data/resource';
-import { userService } from '../../services/userService';
+// import { userService } from '../../services/userService';
 
 type User = any // Schema['User'];
 
@@ -44,12 +44,12 @@ export default function UserProfile() {
   const getUser = async () => {
     dispatch(setLoading(true));
     try {
-      const currentUser = await getCurrentUser();
-      const response = await userService.getUserByOwner(currentUser.userId);
+      // const currentUser = await getCurrentUser();
+      // const response = await userService.getUserByOwner(currentUser.userId);
 
-      if (response.data[0]) {
-        dispatch(setUser(response.data[0]));
-      }
+      // if (response.data[0]) {
+      //   dispatch(setUser(response.data[0]));
+      // }
     } catch (error) {
       dispatch(setError('Failed to fetch user'));
       console.error('Error fetching user:', error);
@@ -65,25 +65,25 @@ export default function UserProfile() {
 
       if (user?.id) {
         // Update existing user
-        const response = await userService.updateUser({
-          ...data,
-          id: user.id,
-        });
-        if (response.data) {
-          dispatch(setUser(response.data));
-        } else {
-          dispatch(setError('Failed to save user'));
-        }
+        // const response = await userService.updateUser({
+        //   ...data,
+        //   id: user.id,
+        // });
+        // if (response.data) {
+        //   dispatch(setUser(response.data));
+        // } else {
+        //   dispatch(setError('Failed to save user'));
+        // }
       } else {
         // Create new user
         console.log('creating user')
-        const response = await userService.createUser(
-          {
-            ...data,
-            owner: currentUser.userId
-          }
-        );
-        dispatch(setUser(response.data));
+        // const response = await userService.createUser(
+        //   {
+        //     ...data,
+        //     owner: currentUser.userId
+        //   }
+        // );
+        // dispatch(setUser(response.data));
       }
       reset(data);
     } catch (error) {

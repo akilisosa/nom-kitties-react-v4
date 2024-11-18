@@ -4,45 +4,43 @@ import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 import "./app.css";
-import { Amplify } from "aws-amplify";
-import outputs from "@/amplify_outputs.json";
 import "@aws-amplify/ui-react/styles.css";
 import Image from 'next/image'
 
 import { IoGameControllerOutline, IoHelpCircleOutline, IoPlanetOutline } from 'react-icons/io5';
 import Link from 'next/link';
 
-Amplify.configure(outputs);
 
- const client = generateClient<Schema>();
+ const client = generateClient<Schema>({authMode: 'apiKey'});
 
 export default function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
-   const [messages, setMessages] = useState<Array<Schema["Message"]["type"]>>([]);
+   const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
 
   function listTodos() {
-    const sub = client.models.Todo.onCreate({
-      filter: {
-        content: { contains: "Hello" },
-      },
-    })
+    const sub = client.models.Todo.observeQuery()
     .subscribe({
       next: (data: any) => console.log([...data.items]),
     });
   }
 
-  function listMessages() {
-    const sub = client.models.Message.observeQuery({
-      filter: {
-        roomID: { eq: '123' },
-      },
-    })
-    .subscribe({
-      next: (data: any) => console.log([...data.items]),
-    });
-  }
+  // function listMessages() {
+  //   messageService.getMessagesByRoomId('123').then((data) => {
+  //     console.log('messages', data);
+  //   });
+    // const sub = client.models.Message.list({
+    //   filter: {
+    //     roomID: { eq: '123' },
+    //   },
+    // }).then((data) => {
+    //   console.log('messages', data);
+    // });
+    // .subscribe({
+    //   next: (data: any) => console.log([...data.items]),
+    // });
+  // }
   useEffect(() => {
-    listTodos();
+    // listTodos();
+    // listMessages();
   }, []);
 
   function createTodo() {
@@ -51,24 +49,6 @@ export default function App() {
     });
   }
 
-
-//   useEffect(() => {
-//   const sub = client.models.Message.observeQuery({
-//    filter: {
-//      roomID: { eq: '123' },
-//    },
-//  })
-//  .subscribe({
-//    next: (data) => {
-//      console.log('New messages:', data);
-//     //  dispatch(setMessages(data.items));
-//     //  scrollToBottom();
-//    },
-//    error: (err) => console.error('Error in subscription:', err),
-//  }) 
-
-//   return () => sub?.unsubscribe();
-// }, []);
 
 
 

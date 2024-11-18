@@ -9,7 +9,7 @@ import { getCurrentUser } from 'aws-amplify/auth';
 
 import { useRouter } from 'next/navigation';  // Add this import
 
-import { roomService, RoomStatusEnum } from '../../services/roomService';
+// import { roomService, RoomStatusEnum } from '../../services/roomService';
 
 
 interface NewGameForm {
@@ -76,22 +76,22 @@ export default function QuickStart({
       const { userId: owner } = await getCurrentUser();
 
 
-      await roomService.createNewRoom({
-        public: data.public ? 'Public' : 'Private',
-        mode: 'classic',
-        name: 'Room',
+      // await roomService.createNewRoom({
+      //   public: data.public ? 'Public' : 'Private',
+      //   mode: 'classic',
+      //   name: 'Room',
 
       
-        totalRounds: Number(data.rounds),
-        currentRound: 0,
-        timeLimit: Number(data.timeLimit),
-        roomLimit: Number(data.roomLimit),
-        simpleCode: data.simpleCode,
-        status: RoomStatusEnum.WAITING,
-        owner,
-        players: [owner],
+      //   totalRounds: Number(data.rounds),
+      //   currentRound: 0,
+      //   timeLimit: Number(data.timeLimit),
+      //   roomLimit: Number(data.roomLimit),
+      //   simpleCode: data.simpleCode,
+      //   status: RoomStatusEnum.WAITING,
+      //   owner,
+      //   players: [owner],
 
-      });
+      // });
 
       router.push(`/online-game/room/${data.simpleCode}`);
     } catch (error) {
