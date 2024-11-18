@@ -6,7 +6,7 @@ import { CreateMessageInput, messageService } from '../services/messageService';
 import { setMessages } from '../store/slices/messageSlice';
 import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/data';
-import { Schema } from '@/amplify/data/resource';
+import type { Schema } from '@/amplify/data/resource';
 import { userService } from '../services/userService';
 import { setUser } from '../store/slices/userSlice';
 interface ChatModalProps {
@@ -38,24 +38,24 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
     }
   }, [isOpen]);
 
-  // useEffect(() => {
-  //   // Subscribe to new messages
-  //    const sub = client.models.Message
-  //    .observeQuery({
-  //     filter: {
-  //       roomID: { eq: roomID },
-  //     },
-  //   }).subscribe({
-  //     next: (data) => {
-  //       console.log('New messages:', data);
-  //       dispatch(setMessages(data.items));
-  //       scrollToBottom();
-  //     },
-  //     error: (err) => console.error('Error in subscription:', err),
-  //   }) 
+  useEffect(() => {
+    // Subscribe to new messages
+     const sub = client.models.Message
+     .observeQuery({
+      filter: {
+        roomID: { eq: roomID },
+      },
+    }).subscribe({
+      next: (data) => {
+        console.log('New messages:', data);
+        dispatch(setMessages(data.items));
+        scrollToBottom();
+      },
+      error: (err) => console.error('Error in subscription:', err),
+    }) 
 
-  //    return () => sub.unsubscribe();
-  // }, [roomID]);
+     return () => sub.unsubscribe();
+  }, [roomID]);
 
   useEffect(() => {
     if(!user) {

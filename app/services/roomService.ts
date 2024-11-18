@@ -1,5 +1,5 @@
 import { generateClient } from "aws-amplify/data";
-import { type Schema } from '../../amplify/data/resource' 
+import type { Schema } from '@/amplify/data/resource' 
 import { getCurrentUser } from "aws-amplify/auth";
 
 export type RoomStatus = 'WAITING' | 'PLAYING' | 'FINISHED' | 'CANCELLED' | null;
