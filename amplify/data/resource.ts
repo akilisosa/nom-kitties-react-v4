@@ -44,7 +44,7 @@ const schema = a.schema({
       timeLimit: a.integer(),
       roomLimit: a.integer(),
       totalRounds: a.integer(),
-      full: a.string(),
+      full: a.boolean(),
       players: a.string().array()
         .authorization(
           (allow) => [allow.owner(), 
@@ -52,10 +52,9 @@ const schema = a.schema({
                       allow.publicApiKey().to(['read', 'update'])],
           ),
 
+          
       spectators: a.string().array(),
       currentRound: a.integer(),
-      turn: a.string(),
-      moves: a.string(),
       winner: a.string(),
 
       // standard

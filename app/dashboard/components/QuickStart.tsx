@@ -1,14 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 // import { RocketLaunchIcon, FootballIcon, ArrowPathIcon, CodeBracketIcon } from '@heroicons/react/24/outline';
 // import { RocketLaunchIcon, FootballIcon, ArrowPathIcon, CodeBracketIcon } from '@heroicons/react/24/outline';
 import { IoRocketOutline, IoFootballOutline, IoRefreshOutline, IoCodeWorkingOutline } from 'react-icons/io5';
 
+import { getCurrentUser } from 'aws-amplify/auth';
+
+
+import { useRouter } from 'next/navigation';  // Add this import
+
+import { roomService, RoomStatusEnum } from '../../services/roomService';
+
+
 interface NewGameForm {
   public: boolean;
-  currentPlayers: string;
-  timeLimit: string;
-  rounds: string;
+  rounds: number;
+  mode: string;
+  timeLimit: number,
+  currentPlayers: number,
+  roomLimit: number,
+  simpleCode: string,
 }
 
 interface QuickStartProps {
@@ -19,28 +30,84 @@ interface QuickStartProps {
   onStartGame?: (formData: NewGameForm) => void;
 }
 
-export default function QuickStart({ 
-  showRefresh = false, 
-  onRefresh, 
-  onJoinGame, 
+export default function QuickStart({
+  showRefresh = false,
+  onRefresh,
+  onJoinGame,
   onJoinPrivate,
-  onStartGame 
+  onStartGame
 }: QuickStartProps) {
+
+
+  const router = useRouter();  // Add this hook
   const [view, setView] = useState<'quickstart' | 'start'>('quickstart');
-  const { register, handleSubmit, watch } = useForm<NewGameForm>({
+
+  const { register, handleSubmit, watch, setValue } = useForm<NewGameForm>({
     defaultValues: {
-      public: false,
-      currentPlayers: '',
-      timeLimit: '',
-      rounds: ''
+      public: true,
+      mode: 'classic',
+      rounds: 3,
+      timeLimit: 30,
+      currentPlayers: 4,
+      roomLimit: 4,
+      simpleCode: '',
     }
   });
 
-  const isPublic = watch('public');
-
-  const onSubmit = (data: NewGameForm) => {
-    onStartGame?.(data);
+  const generate6DigitAlphaNumericCode = () => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return code;
   };
+
+  // Generate code when component mounts
+  useEffect(() => {
+    const code = generate6DigitAlphaNumericCode();
+    setValue('simpleCode', code);
+  }, [setValue]);
+
+  const onSubmit = async (data: NewGameForm) => {
+    try {
+
+      // Get current authenticated user
+      const { userId: owner } = await getCurrentUser();
+
+
+      await roomService.createNewRoom({
+        public: data.public ? 'Public' : 'Private',
+        mode: 'classic',
+        name: 'Room',
+
+      
+        totalRounds: Number(data.rounds),
+        currentRound: 0,
+        timeLimit: Number(data.timeLimit),
+        roomLimit: Number(data.roomLimit),
+        simpleCode: data.simpleCode,
+        status: RoomStatusEnum.WAITING,
+        owner,
+        players: [owner],
+
+      });
+
+      router.push(`/online-game/room/${data.simpleCode}`);
+    } catch (error) {
+      console.error('Failed to create room:', error);
+      // Handle error (show toast notification, etc.)
+    }
+  };
+
+  const handleJoinGame = () => {
+    router.push('/online-game');
+  };
+
+  const handleJoinPrivate = () => {
+    console.log('private game');
+  };
+
 
   return (
     <div className="flex flex-col justify-center m-4 space-y-4">
@@ -87,7 +154,7 @@ export default function QuickStart({
               />
               <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
               <span className="ml-3 text-sm font-medium text-gray-900">
-                {isPublic ? 'Public' : 'Private'}
+                {/* {isPublic ? 'Public' : 'Private'} */}
               </span>
             </label>
           </div>

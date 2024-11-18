@@ -12,19 +12,6 @@ import { Schema } from '@/amplify/data/resource';
 
 type User = any // Schema['User'];
 
-// { //any // Schema['User'];
-// id: string,
-// owner: string | null,
-// name: string,
-// color: string,
-// type: string,
-// score: number,
-// gamesPlayed: number,
-// wins: number,
-// losses: number,
-// createdAt: Date,
-// updatedAt: Date,
-// }
 
 
 export default function UserProfile() {
