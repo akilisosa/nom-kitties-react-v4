@@ -10,63 +10,62 @@ import GameBar from './components/GameBar';
 import ChatModal from '@/app/components/ChatModal';
 
 export default function RoomPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
-  const dispatch = useAppDispatch();
-  const { currentRoom } = useAppSelector((state) => state.room);
-  const [isChatOpen, setIsChatOpen] = useState(false);
+    const router = useRouter();
+    const dispatch = useAppDispatch();
+    const { currentRoom } = useAppSelector((state) => state.room);
+    const [isChatOpen, setIsChatOpen] = useState(false);
 
-  const handleChatOpen = () => {
-    setIsChatOpen(true);
-  };
-
-  const handleChatClose = () => {
-    setIsChatOpen(false);
-  };
-
-  useEffect(() => {
-    const loadRoom = async () => {
-      try {
-        const room = (await roomService.getRoomsBySimpleCode(params.id)).data[0];
-        if (!room) {
-          // Room not found, redirect back to online-game
-          router.push('/online-game');
-          return;
-        }
-        dispatch(setCurrentRoom(room));
-      } catch (error) {
-        console.error('Error loading room:', error);
-        router.push('/online-game');
-      }
+    const handleChatOpen = () => {
+        setIsChatOpen(true);
     };
 
-    loadRoom();
-
-    // Cleanup when leaving the room
-    return () => {
-      dispatch(setCurrentRoom(null));
+    const handleChatClose = () => {
+        setIsChatOpen(false);
     };
-  }, [params.id, dispatch, router]);
+
+    useEffect(() => {
+        const loadRoom = async () => {
+            try {
+                const room = (await roomService.getRoomsBySimpleCode(params.id)).data[0];
+                if (!room) {
+                    // Room not found, redirect back to online-game
+                    router.push('/online-game');
+                    return;
+                }
+                dispatch(setCurrentRoom(room));
+            } catch (error) {
+                console.error('Error loading room:', error);
+                router.push('/online-game');
+            }
+        };
+
+        loadRoom();
+
+        // Cleanup when leaving the room
+        return () => {
+            dispatch(setCurrentRoom(null));
+        };
+    }, [params.id, dispatch, router]);
 
 
-  return (
-    <>
-    <Navbar title={`Room: ${currentRoom?.simpleCode || '-----'}`}/>
-<GameBar onChatOpen={handleChatOpen} onLobbyClick={() => {}} />
-    
-    { !currentRoom ? <div>Loading...</div> :
-         <div>
-         <h1>Room: {currentRoom.name}</h1>
-         {/* Room content */}
-       </div>
-       }
+    return (
+        <>
+            <Navbar title={`Room: ${currentRoom?.simpleCode || '-----'}`} />
+            <GameBar onChatOpen={handleChatOpen} onLobbyClick={() => { }} />
 
-          {/* Chat Modal */}
-      <ChatModal 
-        isOpen={isChatOpen} 
-        onClose={handleChatClose}
-        roomID={currentRoom?.id || ''}
-      />
-    </>
-  )
+            {!currentRoom ? <div>Loading...</div> :
+                <div>
+                    <h1>Room: {currentRoom.name}</h1>
+                </div>
+            }
+
+            {/* Chat Modal */}
+            <ChatModal
+                isOpen={isChatOpen}
+                onClose={handleChatClose}
+                roomID={currentRoom?.id || ''}
+            />
+        </>
+    )
 
 }
