@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react';
 
 interface ChatModalProps {
   isOpen: boolean;
+  roomID: string;
   onClose: () => void;
 }
 
-export default function ChatModal({ isOpen, onClose }: ChatModalProps) {
+export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
   const [isAnimating, setIsAnimating] = useState(false);
-
+console.log("roomID", roomID);
   useEffect(() => {
     if (isOpen) {
       setIsAnimating(true);

@@ -73,6 +73,26 @@ const schema = a.schema({
       // Public can read
       allow.publicApiKey().to(['read']),
     ]),
+
+    // message 
+    Message: a.
+    model({
+      content: a.string().required(),
+      owner: a.string().required(),
+      roomID: a.string().required(),
+      createdAt: a.datetime(),
+      color: a.string().required(),
+      name: a.string().required(),
+    })
+    .secondaryIndexes((index) => [
+      index('roomID').sortKeys(['createdAt']),
+    ])
+    .authorization((allow) => [
+      // Owner can do all operations
+      allow.owner(),
+      // Public can read
+      allow.publicApiKey().to(['create','read']),
+    ]),
     
   
 });

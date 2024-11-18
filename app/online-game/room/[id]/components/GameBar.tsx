@@ -5,14 +5,12 @@ import { useRouter } from 'next/navigation';
 interface GameBarProps {
   onChatOpen: () => void;
   onLobbyClick: () => void;
-  onLeaveRoom: () => void;
 }
 
-export default function GameBar({ onChatOpen, onLobbyClick, onLeaveRoom }: GameBarProps) {
+export default function GameBar({ onChatOpen, onLobbyClick }: GameBarProps) {
   const router = useRouter();
 
   const handleLeaveRoom = () => {
-    onLeaveRoom();
     router.push('/online-game');
   };
 
@@ -34,7 +32,7 @@ export default function GameBar({ onChatOpen, onLobbyClick, onLeaveRoom }: GameB
         </button>
 
         <button
-          onClick={onLeaveRoom}
+          onClick={handleLeaveRoom}
           className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white font-medium rounded transition-colors duration-200 ease-in-out"
         >
           Leave Room
