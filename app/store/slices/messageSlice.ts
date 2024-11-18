@@ -1,10 +1,10 @@
 // store/slices/roomSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Message } from '../../services/messageService'; // Import your Room interface
+// import { Message } from '../../services/messageService'; // Import your Room interface
 
 interface MessageState {
-  currentMessage: Message | null;
-  messages: Message[];
+  currentMessage: any | null;
+  messages: any[];
   loading: boolean;
   error: string | null;
 }
@@ -21,10 +21,10 @@ const messageSlice = createSlice({
   name: 'message',
   initialState,
   reducers: {
-    setCurrentMessage: (state, action: PayloadAction<Message | any>) => {
+    setCurrentMessage: (state, action: PayloadAction< any>) => {
       state.currentMessage = action.payload;
     },
-    setMessages: (state, action: PayloadAction<Message[]>) => {
+    setMessages: (state, action: PayloadAction<any[]>) => {
       state.messages = action.payload;
     },
     setLoading: (state, action: PayloadAction<boolean>) => {

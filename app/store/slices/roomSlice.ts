@@ -1,10 +1,10 @@
 // store/slices/roomSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Room } from '../../services/roomService'; // Import your Room interface
+// import { Room as any } from '../../services/roomService'; // Import your Room interface
 
 interface RoomState {
-  currentRoom: Room | null;
-  rooms: Room[];
+  currentRoom: any | null;
+  rooms: any[];
   loading: boolean;
   error: string | null;
 }
@@ -21,10 +21,10 @@ const roomSlice = createSlice({
   name: 'room',
   initialState,
   reducers: {
-    setCurrentRoom: (state, action: PayloadAction<Room | any>) => {
+    setCurrentRoom: (state, action: PayloadAction<any | any>) => {
       state.currentRoom = action.payload;
     },
-    setRooms: (state, action: PayloadAction<Room[]>) => {
+    setRooms: (state, action: PayloadAction<any[]>) => {
       state.rooms = action.payload;
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
