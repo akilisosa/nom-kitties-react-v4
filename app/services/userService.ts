@@ -27,12 +27,17 @@ export interface User {
 export const userService = {
     getUserByOwner: async (owner: string) => {
         const client = generateClient<Schema>({authMode: 'apiKey'});
-        return await client.models.User.listUserByOwner({
-            owner,
-        }, {
-            limit: 1,
-        });
-    },
+        return await client.models.User.list({
+            filter: {
+                owner: {
+                    eq: owner
+                }
+            },
+            limit: 1
+    //     }, {
+    //         limit: 1,
+         });
+     },
     createUser: async (user: CreateUserInput) => {
         const client = generateClient<Schema>({authMode: 'userPool'});
         const { userId: owner } = await getCurrentUser()
