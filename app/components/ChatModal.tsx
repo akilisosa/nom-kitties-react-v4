@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/store';
 import { CreateMessageInput, messageService } from '../services/messageService';
-import { setMessages } from '../store/slices/messageSlice';
 import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
@@ -20,7 +19,7 @@ interface ChatModalProps {
 
  type Message = Schema['Message']['type'];
 
- Amplify.configure(outputs);
+//  Amplify.configure(outputs);
 
 const client = generateClient<Schema>({ authMode: 'apiKey' });
 export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
@@ -29,8 +28,10 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
-  const messages = useAppSelector((state) => state.message.messages);
+  // const [messages, setMessages] = useState<Message[]>([])
+  // const messages = useAppSelector((state) => state.message.messages);
   const user = useAppSelector((state) => state.user.user); // Assuming you have auth slice
+
 
 
   // useEffect 
@@ -49,42 +50,37 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
     });
   }
 
-  function listMessages() {
-    client.models.Message.observeQuery({
-      filter: {
-        roomID: { eq: roomID },
-      },
-    }).subscribe({
-      next: (data) => console.log([...data.items]),
-    });
-  }
-  
-
-  useEffect(() => {
-    if (roomID) {
-      listMessages();
-    }
-  }, [roomID]);
-
+  // function listMessages() {
+  //   client.models.Message.observeQuery().subscribe({
+  //     next: (data) => console.log([...data.items]),
+  //   });
+  // }
 
   // useEffect(() => {
-  //   // Subscribe to new messages
-  //    const sub = client.models.Message
-  //    .observeQuery({
-  //     filter: {
-  //       roomID: { eq: roomID },
-  //     },
-  //   }).subscribe({
-  //     next: (data) => {
-  //       console.log('New messages:', data);
-  //       dispatch(setMessages(data.items));
-  //       scrollToBottom();
-  //     },
-  //     error: (err) => console.error('Error in subscription:', err),
-  //   }) 
-
-  //    return () => sub.unsubscribe();
+  //   if (roomID) {
+  //      messageService.subscribeToMessages('123', () => {});
+  //   }
   // }, [roomID]);
+
+
+  useEffect(() => {
+    // Subscribe to new messages
+   //  const sub = client.models.Message.get({ id: '123' })
+    //  .observeQuery({
+    //   filter: {
+    //     roomID: { eq: roomID },
+    //   },
+    // }).subscribe({
+    //   next: (data) => {
+    //     console.log('New messages:', data);
+    //     // dispatch(setMessages(data.items));
+    //     scrollToBottom();
+    //   },
+    //   error: (err) => console.error('Error in subscription:', err),
+    // }) 
+
+   //  return () => sub?.unsubscribe();
+  }, [roomID]);
 
   useEffect(() => {
     if(!user) {
@@ -93,7 +89,7 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
   })
 
   // util functions 
-  const scrollToBottom = () => {
+  const scrollToBottom = (): void => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -106,7 +102,7 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
   const loadInitialMessages = async () => {
     try {
       const fetchedMessages = (await messageService.getMessagesByRoomId(roomID)).data;
-      dispatch(setMessages(fetchedMessages || []));
+      // dispatch(setMessages(fetchedMessages || []));
       scrollToBottom();
     } catch (error) {
       console.error('Failed to load messages:', error);

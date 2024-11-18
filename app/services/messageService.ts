@@ -33,6 +33,25 @@ export const messageService = {
         });
     },
 
+    // subscribeToMessages: (roomID: string, onMessageReceived: (message: Message) => void) => {
+    //     const client = generateClient<Schema>({authMode: 'apiKey'});
+    //     const subscription = client.models.Message.observeQuery({
+    //         filter: {
+    //             roomID: { eq: roomID },
+    //         },
+    //     }).subscribe({
+    //         next: (data) => {
+    //             const messages = data.items;
+    //             messages.forEach((message) => {
+    //                 onMessageReceived(message);
+    //             });
+    //         },
+    //         error: (err) => console.error('Error in subscription:', err),
+    //     });
+
+    //     return subscription;
+    // },
+
     createNewMessage: async (message: CreateMessageInput) => {
         const client = generateClient<Schema>({authMode: 'userPool'});
         const { userId: owner } = await getCurrentUser()

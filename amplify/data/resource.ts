@@ -7,6 +7,11 @@ specifies that any user authenticated via an API key can "create", "read",
 "update", and "delete" any "Todo" records.
 =========================================================================*/
 const schema = a.schema({
+  Todo: a
+    .model({
+      content: a.string(),
+    })
+    .authorization((allow) => [allow.publicApiKey()]),
 
   // message 
   Message: a.
@@ -18,22 +23,15 @@ const schema = a.schema({
       color: a.string().required(),
       name: a.string().required(),
     })
-    .authorization((allow) => [allow.publicApiKey()]),
-    // .secondaryIndexes((index) => [
-    //   index('roomID').sortKeys(['createdAt']),
-    // ])
-    // .authorization((allow) => [
-    //   // Owner can do all operations
-    //   allow.owner(),
-    //   // Public can read
-    //   allow.publicApiKey().to(['create', 'read']),
-    // ]),
-
-  Todo: a
-    .model({
-      content: a.string(),
-    })
-    .authorization((allow) => [allow.publicApiKey()]),
+    .secondaryIndexes((index: any) => [
+      index('roomID').sortKeys(['createdAt']),
+    ])
+    .authorization((allow: any) => [
+      // Owner can do all operations
+      allow.owner(),
+      // Public can read
+      allow.publicApiKey() //.to(['create', 'read']),
+    ]),
 
   // USER
   User: a
@@ -47,10 +45,10 @@ const schema = a.schema({
       losses: a.integer(),
       owner: a.string().required(),
     })
-    .secondaryIndexes((index) => [
+    .secondaryIndexes((index: any) => [
       index('owner'),
     ])
-    .authorization((allow) => [
+    .authorization((allow: any) => [
       // Owner can do all operations
       allow.owner(),
       // Public can read
@@ -72,7 +70,7 @@ const schema = a.schema({
       full: a.boolean(),
       players: a.string().array()
         .authorization(
-          (allow) => [allow.owner(),
+          (allow: any) => [allow.owner(),
           allow.authenticated().to(['read', 'update']),
           allow.publicApiKey().to(['read', 'update'])],
         ),
@@ -86,12 +84,12 @@ const schema = a.schema({
       owner: a.string().required(),
       createdAt: a.datetime(),
     })
-    .secondaryIndexes((index) => [
+    .secondaryIndexes((index: any) => [
       index('public').sortKeys(['createdAt']),
       index('mode').sortKeys(['createdAt']),
       index('simpleCode'),
     ])
-    .authorization((allow) => [
+    .authorization((allow: any) => [
       // Owner can do all operations
       allow.owner(),
       allow.authenticated().to(['read']),
@@ -102,7 +100,10 @@ const schema = a.schema({
 
 
 
-});
+}).authorization((allow) => [
+  // Public can read
+  allow.publicApiKey().to(['read']),
+  ]);
 
 export type Schema = ClientSchema<typeof schema>;
 

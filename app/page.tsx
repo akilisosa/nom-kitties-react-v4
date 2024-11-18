@@ -18,31 +18,29 @@ Amplify.configure(outputs);
 
 export default function App() {
   const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+   const [messages, setMessages] = useState<Array<Schema["Message"]["type"]>>([]);
 
   function listTodos() {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => console.log([...data.items]),
+    const sub = client.models.Todo.onCreate({
+      filter: {
+        content: { contains: "Hello" },
+      },
+    })
+    .subscribe({
+      next: (data: any) => console.log([...data.items]),
     });
   }
 
-//   useEffect(() => {
-//   const sub = client.models.Message
-//   .observeQuery({
-//    filter: {
-//      roomID: { eq: '123' },
-//    },
-//  }).subscribe({
-//    next: (data) => {
-//      console.log('New messages:', data);
-//     //  dispatch(setMessages(data.items));
-//     //  scrollToBottom();
-//    },
-//    error: (err) => console.error('Error in subscription:', err),
-//  }) 
-
-//   return () => sub.unsubscribe();
-// }, []);
-
+  function listMessages() {
+    const sub = client.models.Message.observeQuery({
+      filter: {
+        roomID: { eq: '123' },
+      },
+    })
+    .subscribe({
+      next: (data: any) => console.log([...data.items]),
+    });
+  }
   useEffect(() => {
     listTodos();
   }, []);
@@ -52,6 +50,27 @@ export default function App() {
       content: window.prompt("Todo content"),
     });
   }
+
+
+//   useEffect(() => {
+//   const sub = client.models.Message.observeQuery({
+//    filter: {
+//      roomID: { eq: '123' },
+//    },
+//  })
+//  .subscribe({
+//    next: (data) => {
+//      console.log('New messages:', data);
+//     //  dispatch(setMessages(data.items));
+//     //  scrollToBottom();
+//    },
+//    error: (err) => console.error('Error in subscription:', err),
+//  }) 
+
+//   return () => sub?.unsubscribe();
+// }, []);
+
+
 
   return (
 <main className="min-h-screen p-8">
