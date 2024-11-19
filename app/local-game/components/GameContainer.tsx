@@ -206,18 +206,18 @@ const generateRandomPosition = (): { x: number, y: number } => {
 
 
 // undo
-    // const spawnCollectible = useCallback(() => {
-    //     if (collectibles.length < treatsOnFloor) {
-    //         const position = generateRandomPosition();
-    //         setCollectibles(prev => [...prev, {
-    //             x: position.x,
-    //             y: position.y,
-    //             radius: COLLECTIBLE_RADIUS,
-    //             color: 'yellow',
-    //             active: true
-    //         }]);
-    //     }
-    // }, [collectibles.length, treatsOnFloor, COLLECTIBLE_RADIUS]);
+    const spawnCollectible = useCallback(() => {
+        if (collectibles.length < treatsOnFloor) {
+            const position = generateRandomPosition();
+            setCollectibles(prev => [...prev, {
+                x: position.x,
+                y: position.y,
+                radius: COLLECTIBLE_RADIUS,
+                color: 'yellow',
+                active: true
+            }]);
+        }
+    }, [collectibles.length, treatsOnFloor, COLLECTIBLE_RADIUS]);
     
 
     // undo
@@ -237,24 +237,24 @@ const generateRandomPosition = (): { x: number, y: number } => {
     //     setCollectibles(newCollectibles);
     // }, [size, COLLECTIBLE_RADIUS, treatsOnFloor, scaledObstacles]);
       // Keep the size change effect
-//   useEffect(() => {
-//     if (isInitialized.current) {
-//       setCollectibles(prevCollectibles => {
-//         const newCollectibles = [];
-//         for (let i = 0; i < treatsOnFloor; i++) {
-//           const position = generateRandomPosition();
-//           newCollectibles.push({
-//             x: position.x,
-//             y: position.y,
-//             radius: COLLECTIBLE_RADIUS,
-//             color: 'yellow',
-//             active: true
-//           });
-//         }
-//         return newCollectibles;
-//       });
-//     }
-//   }, [size]);
+  useEffect(() => {
+    if (isInitialized.current) {
+      setCollectibles(prevCollectibles => {
+        const newCollectibles = [];
+        for (let i = 0; i < treatsOnFloor; i++) {
+          const position = generateRandomPosition();
+          newCollectibles.push({
+            x: position.x,
+            y: position.y,
+            radius: COLLECTIBLE_RADIUS,
+            color: 'yellow',
+            active: true
+          });
+        }
+        return newCollectibles;
+      });
+    }
+  }, [size]);
 
 //   useEffect(() => {
 //     if (isInitialized.current && collectibles.length < treatsOnFloor) {
@@ -264,12 +264,12 @@ const generateRandomPosition = (): { x: number, y: number } => {
 
 
     // Add a separate effect to handle spawning new collectibles
-// useEffect(() => {
-//     if (collectibles.length < treatsOnFloor) {
+useEffect(() => {
+    if (collectibles.length < treatsOnFloor) {
 
-//         spawnCollectible();
-//     }
-// }, [collectibles.length, size, treatsOnFloor, scaledObstacles]);
+        spawnCollectible();
+    }
+}, [collectibles.length, size, treatsOnFloor, scaledObstacles]);
 
     const checkCollectibleCollection = useCallback((player: Player, isPlayer1: boolean) => {
         setCollectibles(prevCollectibles => {
@@ -286,6 +286,7 @@ const generateRandomPosition = (): { x: number, y: number } => {
                         const newScores = isPlayer1 
                             ? { ...prev, player1: prev.player1 + 1 }
                             : { ...prev, player2: prev.player2 + 1 };
+                            // TODO:  ISSUE: onScoreChange causing double render
                         onScoreChange(newScores);
                         return newScores;
                     });
