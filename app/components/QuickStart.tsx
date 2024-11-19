@@ -7,7 +7,7 @@ import { getCurrentUser } from 'aws-amplify/auth';
 
 import { useRouter } from 'next/navigation';
 
-import { roomService, RoomStatusEnum } from '../../services/roomService';
+import { roomService, RoomStatusEnum } from '../services/roomService';
 
 
 interface NewGameForm {

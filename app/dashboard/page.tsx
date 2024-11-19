@@ -2,9 +2,35 @@
 import Navbar from "../components/NavBar";
 import ProtectedRoute from "../components/ProtectedRoute";
 import UserProfile from "./components/UserProfile";
-import QuickStart from "./components/QuickStart";
+import QuickStart from "../components/QuickStart";
+import { useRouter } from "next/navigation";
+import { useAppDispatch } from "../store/store";
+import { useEffect, useState } from "react";
+import { Schema } from "@/amplify/data/resource";
+import { roomService } from "../services/roomService";
+
+type Room = Schema['Room']['type'];
 
 export default function Dashboard() {
+const router = useRouter();
+const dispatch = useAppDispatch();
+
+const [roomList, setRoomList] = useState<Room[]>([]);
+
+const fetchRooms = async () => {
+  try {
+      const rooms = (await roomService.getRoomsByPublic('classic')).data;
+      setRoomList(rooms);
+  } catch (error) {
+      console.error('Error fetching rooms:', error);
+  }
+};
+
+
+useEffect(() => {
+    fetchRooms();
+}, [])
+
   return (
     <ProtectedRoute>
      <Navbar title="Dashboard" />
@@ -18,7 +44,7 @@ export default function Dashboard() {
 
           {/* Quick Start Section */}
           <div className="flex flex-col justify-center">
-            <QuickStart />
+            <QuickStart onJoinGame={() => router.push('/online-game')} />
           </div>
         </div>
 

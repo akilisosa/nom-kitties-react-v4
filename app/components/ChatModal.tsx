@@ -1,6 +1,6 @@
 // components/ChatModal.tsx
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/store';
 import { CreateMessageInput, messageService } from '../services/messageService';
 import { getCurrentUser } from 'aws-amplify/auth';
@@ -8,15 +8,12 @@ import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
 import { userService } from '../services/userService';
 import { setUser } from '../store/slices/userSlice';
-import { Amplify } from "aws-amplify";
-import outputs from "@/amplify_outputs.json";
 
 interface ChatModalProps {
   isOpen: boolean;
   roomID: string;
   onClose: () => void;
 }
-
 
  type Message = Schema['Message']['type'];
 
@@ -28,61 +25,35 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
 
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [messageList, setMessageList] = useState<Message[]>([]);
   const dispatch = useAppDispatch();
-  // const [messages, setMessages] = useState<Message[]>([])
-  // const messages = useAppSelector((state) => state.message.messages);
+  const messages = useAppSelector((state) => state.message.messages);
   const user = useAppSelector((state) => state.user.user); // Assuming you have auth slice
 
 
-
-  // useEffect 
-
-  console.log("roomID", roomID);
   useEffect(() => {
     if (isOpen) {
       setIsAnimating(true);
-      loadInitialMessages();
+      // loadInitialMessages();
     }
   }, [isOpen]);
 
-  function listTodos() {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => console.log([...data.items]),
-    });
-  }
 
   function listMessages() {
     client.models.Message.observeQuery().subscribe({
-      next: (data) => console.log([...data.items]),
+      next: (data) => {
+        setMessageList([...data.items])
+        scrollToBottom();
+      },
     });
   }
 
   useEffect(() => {
     if (roomID) {
       listMessages();
-       //messageService.subscribeToMessages('123', () => {});
     }
   }, [roomID]);
 
-
-  useEffect(() => {
-    // Subscribe to new messages
-   //  const sub = client.models.Message.get({ id: '123' })
-    //  .observeQuery({
-    //   filter: {
-    //     roomID: { eq: roomID },
-    //   },
-    // }).subscribe({
-    //   next: (data) => {
-    //     console.log('New messages:', data);
-    //     // dispatch(setMessages(data.items));
-    //     scrollToBottom();
-    //   },
-    //   error: (err) => console.error('Error in subscription:', err),
-    // }) 
-
-   //  return () => sub?.unsubscribe();
-  }, [roomID]);
 
   useEffect(() => {
     if(!user) {
@@ -92,7 +63,9 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
 
   // util functions 
   const scrollToBottom = (): void => {
+    setTimeout(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
 
   const getUser = async () => {
@@ -101,19 +74,9 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
     dispatch(setUser(response.data[0]));
   }
 
-  const loadInitialMessages = async () => {
-    try {
-      const fetchedMessages = (await messageService.getMessagesByRoomId(roomID)).data;
-      // dispatch(setMessages(fetchedMessages || []));
-      scrollToBottom();
-    } catch (error) {
-      console.error('Failed to load messages:', error);
-    }
-  };
-
   const handleSendMessage = async () => {
+    console.log('sending message', newMessage)
     if (!newMessage.trim()) return;
-
     const { userId: owner } = await getCurrentUser()
 
     try {
@@ -121,27 +84,37 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
         content: newMessage,
         owner, // Adjust based on your auth setup
         roomID,
-        color: '123', // currentUser.color, // Adjust based on your user setup
-        name: 'kittycat' //currentUser.name,
+        color: user?.color || '#000000', // currentUser.color, // Adjust based on your user setup
+        name: user?.name || 'kittycat' //currentUser.name,
       };
-
       await messageService.createNewMessage(messageInput);
-      // if(!newMess) return;
-      // messages.push(newMess);
-      // dispatch(setMessages(messages));
-      setNewMessage('');
+     
     } catch (error) {
       console.error('Error sending message:', error);
     }
-  };
-
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+    finally {
+      setNewMessage('');
     }
   };
+
+
+  const handleKeyPress = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      console.log('enter pressed')
+      handleSendMessage();
+    }
+  }, [handleSendMessage]);
+
+  useEffect(() => {
+    // Add event listener when component mounts
+    document.addEventListener('keydown', handleKeyPress);
+
+    // Cleanup: remove event listener when component unmounts
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [handleKeyPress]); // Re-run effect if handleKeyPress changes
 
 
   if (!isOpen && !isAnimating) return null;
@@ -188,11 +161,23 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
         <div className="flex-1 flex flex-col p-4 overflow-hidden">
           {/* Messages Container */}
           <div className="flex-1 overflow-y-auto mb-4">
-            <div className="space-y-4">
-              {/* Example message */}
-              <div className="bg-gray-100 p-3 rounded-lg max-w-[80%]">
-                Example message
-              </div>
+            <div className="chat-container space-y-4">
+
+              { messageList
+              .sort((a, b) => a.createdAt < b.createdAt ? -1 : 1)
+              .map((message) => (
+                <div key={message.id} className="flex bg-gray-100 max-w-[85%] rounded-lg items-center space-x-2">
+                  <div
+                    className="w-8 h-8 rounded-full"
+                    style={{ backgroundColor: message.color }}
+                  ></div>
+                  <div className="flex flex-col">
+                    <span className="font-semibold">{message.name}</span>
+                    <span>{message.content}</span>
+                  </div>
+                </div>
+              ))}
+      <div ref={messagesEndRef} /> {/* Empty div for scroll target */}
             </div>
           </div>
 
@@ -201,10 +186,12 @@ export default function ChatModal({ isOpen, onClose, roomID }: ChatModalProps) {
             <div className="flex gap-2">
               <input
                 type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Type a message..."
                 className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
               />
-              <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200">
+              <button onClick={handleSendMessage} className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200">
                 Send
               </button>
             </div>
