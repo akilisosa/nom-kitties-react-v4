@@ -1,16 +1,17 @@
 
 'use client';
 
+import { Schema } from '@/amplify/data/resource';
 import Image from 'next/image';
+import { IoGameController } from 'react-icons/io5';
 // import React from 'react';
-interface Game {
-    simpleCode: string;
-    mode: string;
-  }
+
+type Room = Schema['Room']['type'];
+
   
   interface GameListProps {
-    roomList: Game[];
-    onJoinGame: (game: Game) => void;
+    roomList: Room[];
+    onJoinGame: (game: Room) => void;
   }
 
 
@@ -48,30 +49,18 @@ interface Game {
         </div>
   
         <div className="divide-y">
-          {roomList.map((game) => (
+          {roomList.map((room) => (
             <div 
-              key={game.simpleCode}
-              onClick={() => onJoinGame(game)}
+              key={room.id}
+              onClick={() => onJoinGame(room)}
               className="flex justify-between items-center p-4 hover:bg-gray-50 cursor-pointer"
             >
               <div>
-                <h2 className="font-medium">{game.simpleCode}</h2>
-                <p className="text-gray-600">{game.mode}</p>
+                <h2 className="font-medium">{room.simpleCode}</h2>
+                <p className="text-gray-600">{room.mode}</p>
               </div>
               {/* Using a game controller icon from heroicons or similar */}
-              <svg 
-                className="w-6 h-6" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
-                />
-              </svg>
+              <IoGameController className="w-6 h-6 text-blue-500" />
             </div>
           ))}
         </div>

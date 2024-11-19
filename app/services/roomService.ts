@@ -24,7 +24,7 @@ export interface UpdateRoomByPlayerInput {
     players: string[];
 }
 
-type Room = Schema['Room']['type'][0];
+type Room =  any; //Schema['Room']['type'][0];
 
 export const roomService = {
     
@@ -77,12 +77,12 @@ export const roomService = {
     return await client.models.Room.update(room);
   },
 
-  updateRoomByPlayer: async (room: UpdateRoomByPlayerInput) => {
-    const client = generateClient<Schema>({authMode: 'userPool'});
-    return room
-    // return await client.models.Room.update({
-    //     ...room,
-    // });
+  joinRoom: async (id: string, players: any[]) => {
+    const client = generateClient<any>({authMode: 'userPool'});
+    return await client.models.Room.update({
+    id,
+    players,
+    });
   },
 
 
