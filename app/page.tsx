@@ -16,13 +16,6 @@ import Link from 'next/link';
 export default function App() {
    const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
 
-  function listTodos() {
-    const sub = client.models.Todo.observeQuery()
-    .subscribe({
-      next: (data: any) => console.log([...data.items]),
-    });
-  }
-
   // function listMessages() {
   //   messageService.getMessagesByRoomId('123').then((data) => {
   //     console.log('messages', data);

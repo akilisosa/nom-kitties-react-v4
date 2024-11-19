@@ -76,7 +76,7 @@ export function GameContainer({ size, player1Color, player2Color, onScoreChange,
     player2Ref.current.speed = getScaledValue(5, size);
   }, [size]);
 
-  const baseObstacles = useMemo(() => [
+  const baseObstacles = [
     {
         x: 200,  // original positions
         y: 200,
@@ -98,7 +98,7 @@ export function GameContainer({ size, player1Color, player2Color, onScoreChange,
         height: 20,
         color: 'gray'
     }
-], []); // Empty dependency array since these are constant
+]; // Empty dependency array since these are constant
 
     // Scale obstacles based on current size
     const scaledObstacles = useMemo(() => 
@@ -109,12 +109,7 @@ export function GameContainer({ size, player1Color, player2Color, onScoreChange,
             height: getScaledValue(obstacle.height, size),
             color: obstacle.color
         }))
-
-
     , [size, baseObstacles]);
-
-
-    
 
 
     // Keyboard state tracking
