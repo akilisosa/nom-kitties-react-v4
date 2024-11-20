@@ -36,6 +36,7 @@ export default function RoomPage({ params }: { params: { id: string } }) {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [owner, setOwner] = useState('');
     const [admin, setAdmin] = useState(false);
+    const [players, setPlayers] = useState<any[]>([]);
     // Use useRef for players instead of useState
     const playersRef = useRef<Player[]>([]);
     const size = useFullGameSize();
@@ -100,11 +101,16 @@ export default function RoomPage({ params }: { params: { id: string } }) {
                 }
                 if (!room.players?.includes(owner)) {
                     const players: any[] = room.players ? room.players : [];
-                    room = (await roomService.joinRoom(room.id, [players, owner])).data[0];
+                    room = (await roomService.joinRoom(room.id, [...players, owner])).data[0];
                     console.log('aye')
                     console.log('room', room)
-                }
+                   
+            }
 
+            if(!playersRef.current.some(player => player.id === owner)) {
+                playersRef.current.push({ id: owner, x: 0, y: 0, size: getScaledValue(50, size), color: 'blue', speed: 5 });
+            }
+                // add owner to player  ref: 
 
 
                 dispatch(setCurrentRoom(room));
@@ -124,6 +130,23 @@ export default function RoomPage({ params }: { params: { id: string } }) {
 
     // Add an effect for player updates subscription
     // In your RoomPage component
+useEffect(() => {
+
+   const  updatePlayersSize = (size: number) => {
+        playersRef.current.forEach(player => {
+            player.size = getScaledValue(50, size);
+            player.speed = getScaledValue(5, size);
+        });
+        setPlayers([...playersRef.current]);
+    }
+
+    updatePlayersSize(size);
+
+}, [size]);
+
+
+
+
 
     useEffect(() => {
         if (!gameDataServiceRef.current) {
@@ -145,69 +168,7 @@ export default function RoomPage({ params }: { params: { id: string } }) {
         return () => subscription.unsubscribe();
       }, []);
 
-    // useEffect(() => {
-    //     try {
-    //       gameDataService.connect();
-    //       const subscription = gameDataService.getMessageSubject().subscribe({
-    //         next: (data) => {
-    //           console.log('Received data:', data);
-    //           // Handle received data
-    //         },
-    //         error: (err) => {
-    //           console.error('Subscription error:', err);
-    //           setError('Failed to establish WebSocket connection.');
-    //         },
-    //       });
-    
-    //       return () => subscription.unsubscribe();
-    //     } catch (err) {
-    //       console.error('Connection error:', err);
-    //       setError('Failed to establish WebSocket connection.');
-    //     }
-    //   }, [gameDataService]);
 
-    // useEffect(() => {
-    //     if (!currentRoom?.id) return;
-
-    //     // Connect to WebSocket
-    //     const connection = gameDataService.connect().subscribe({
-    //         next: (data) => console.log('Received:', data),
-    //         error: (error) => console.error('Error:', error),
-    //         complete: () => console.log('Completed')
-    //     });
-
-    //     gameDataService.subscribe('your-channel-path');
-
-
-    //         // Cleanup function
-    //         return () => {
-    //             connection.unsubscribe();
-    //             gameDataService.disconnect();
-    //           };
-
-    // }, [currentRoom?.id]);
-
-
-    // useEffect(() => {
-    //     const subscription = playerService.connect().subscribe((message) => {
-    //       console.log('Received message:', message);
-    //     });
-    
-    //     playerService.connectionPromise.then(() => {
-    //       playerService.subscribe('your-channel-path');
-    //     }).catch((error) => {
-    //       console.error('Failed to establish WebSocket connection:', error);
-    //     });
-    
-    //     return () => {
-    //       subscription.unsubscribe();
-    //       playerService.disconnect();
-    //     };
-    //   }, []);
-
-    // const sendMessage = () => {
-    //     playerService.sendMessage('your-channel-path', { your: 'data' });
-    //   };
 
         // Scale obstacles based on current size
         const scaledObstacles = useMemo(() =>
@@ -222,12 +183,17 @@ export default function RoomPage({ params }: { params: { id: string } }) {
     
             const handleGameTick = useCallback(() => {
                 const players = playersRef.current;
+
                 const keys = keysRef.current;
                 const currentUserId = owner; // You'll need to implement this to get current user's ID
-            
+
                 players.forEach((player) => {
                     // Only calculate movement for the current player
+                    console.log('player', player)
+                
                     if (player.id !== currentUserId) return;
+
+                    
             
                     // Calculate new position based on keys pressed
                     let newX = player.x;
@@ -238,6 +204,9 @@ export default function RoomPage({ params }: { params: { id: string } }) {
                     if (keys.a) newX -= player.speed;
                     if (keys.s) newY += player.speed;
                     if (keys.w) newY -= player.speed;
+
+                        // Calculate player size based on the current size
+
             
                     // Check collisions with obstacles
                     const collidesWithObstacle = checkObstacleCollisions(
@@ -257,27 +226,28 @@ export default function RoomPage({ params }: { params: { id: string } }) {
                             size
                         )
                     );
-            
+
+                    console.log('collidesWithObstacle', collidesWithObstacle)
+                    console.log('collidesWithPlayer', collidesWithPlayer)
                     // Update position if no collisions
                     if (!collidesWithObstacle && !collidesWithPlayer) {
                         player.x = Math.max(0, Math.min(newX, size - player.size));
                         player.y = Math.max(0, Math.min(newY, size - player.size));
             
                         // Publish the updated position to other players
-                        playerService.publishEvent(`/game/${currentRoom.id}/players`, {
-                            playerId: player.id,
-                            x: player.x,
-                            y: player.y
-                        });
+                        // playerService.publishEvent(`/game/${currentRoom.id}/players`, {
+                        //     playerId: player.id,
+                        //     x: player.x,
+                        //     y: player.y
+                        // });
                     }
             
                     // Check for collectible collection
                     checkCollectibleCollection(player, true);
                 });
             
-            }, [size, scaledObstacles, checkCollectibleCollection, currentRoom?.id]);
+            }, [size, checkCollectibleCollection, currentRoom?.id]);
             
-
 
     return (
         <>

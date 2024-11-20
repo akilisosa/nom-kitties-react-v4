@@ -124,6 +124,31 @@ class GameDataService {
     }
   }
 
+  publishEventv2(channelName: string, eventData: any) {
+    const endpoint = `https://${this.HTTP_DOMAIN}/event`;
+    
+    const mutation = {
+      query: `mutation PublishEvent($channelName: String!, $event: AWSJSON!) {
+        publish(channelName: $channelName, event: $event) {
+          event
+        }
+      }`,
+      variables: {
+        channelName: channelName,
+        event: JSON.stringify(eventData)  // Using eventData instead of hardcoded array
+      }
+    };
+  
+    return fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": this.API_KEY
+      },
+      body: JSON.stringify(mutation)  // Using the mutation object
+    });
+  }
+
   publishEvent(channelName: string, eventData: any) {
     const endpoint = `https://${this.HTTP_DOMAIN}/event`;
     

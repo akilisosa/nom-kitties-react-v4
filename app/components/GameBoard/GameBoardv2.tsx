@@ -22,6 +22,11 @@ interface GameBoardProps {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const animationFrameId = useRef<number>();
 
+    // const animationFrameId = useRef(null);
+    const lastUpdateTimeRef = useRef(0);
+    const updateInterval = 1000 / 20; // 20 times per second
+  
+
   
     useEffect(() => {
       const canvas = canvasRef.current;
@@ -34,7 +39,10 @@ interface GameBoardProps {
         cancelAnimationFrame(animationFrameId.current);
     }
   
-      const gameLoop = () => {
+      const gameLoop = (timestamp: any) => {
+        if (timestamp - lastUpdateTimeRef.current >= updateInterval) {
+          lastUpdateTimeRef.current = timestamp;
+        
         // Clear and draw background
         ctx.clearRect(0, 0, size, size);
         ctx.fillStyle = 'lightgray';
@@ -64,9 +72,10 @@ interface GameBoardProps {
        playerList.forEach(player => {
             drawKitty(ctx, player.x, player.y, player.size, player.color);
             });
-
+            console.log('doing this on game tick')
   
         onGameTick();
+          }
        // requestAnimationFrame(gameLoop);
         animationFrameId.current = requestAnimationFrame(gameLoop);
       };
