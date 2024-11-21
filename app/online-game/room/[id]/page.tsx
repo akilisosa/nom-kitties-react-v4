@@ -120,11 +120,6 @@ export default function RoomPage({ params }: { params: { id: string } }) {
         // Cleanup when leaving the room
         return () => {
             dispatch(setCurrentRoom(null));
-
-            if (gameDataServiceRef.current) {
-                gameDataServiceRef.current.getMessageSubject()//?//.unsubscribe();
-                gameDataServiceRef.current = null;
-              }
         };
     }, [params.id, dispatch, router]);
 
@@ -162,120 +157,123 @@ export default function RoomPage({ params }: { params: { id: string } }) {
             }))
             , [size]);
 
-    
             const handleGameTick = useCallback(() => {
-                const players = playersRef.current;
+                console.log('wow')
+            }, [])
+    
+//             const handleGameTick = useCallback(() => {
+//                 const players = playersRef.current;
 
-                const keys = keysRef.current;
-                const currentUserId = owner; // You'll need to implement this to get current user's ID
+//                 const keys = keysRef.current;
+//                 const currentUserId = owner; // You'll need to implement this to get current user's ID
 
-                players.forEach((player) => {
-                    // Only calculate movement for the current player
-                    console.log('player', player)
+//                 players.forEach((player) => {
+//                     // Only calculate movement for the current player
+//                     console.log('player', player)
                 
-                    if (player.id !== currentUserId) return;
+//                     if (player.id !== currentUserId) return;
 
-                    // Calculate new position based on keys pressed
-                    let newX = player.x;
-                    let newY = player.y;
+//                     // Calculate new position based on keys pressed
+//                     let newX = player.x;
+//                     let newY = player.y;
             
-                    // WASD controls
-                    if (keys.d) newX += player.speed; 
-                    if (keys.a) newX -= player.speed;
-                    if (keys.s) newY += player.speed;
-                    if (keys.w) newY -= player.speed;
+//                     // WASD controls
+//                     if (keys.d) newX += player.speed; 
+//                     if (keys.a) newX -= player.speed;
+//                     if (keys.s) newY += player.speed;
+//                     if (keys.w) newY -= player.speed;
 
-                        // Calculate player size based on the current size
-                        player.size = getScaledValue(50, size);
+//                         // Calculate player size based on the current size
+//                         player.size = getScaledValue(50, size);
 
-                           // Check collisions with obstacles
-      const { x: maxDistanceX, y: maxDistanceY } = checkObstacleCollisionsv2(
-        player,
-        newX,
-        newY,
-        scaledObstacles,
-      );
+//                            // Check collisions with obstacles
+//       const { x: maxDistanceX, y: maxDistanceY } = checkObstacleCollisionsv2(
+//         player,
+//         newX,
+//         newY,
+//         scaledObstacles,
+//       );
 
-  // Handle X-axis collision
-if (maxDistanceX !== Infinity) {  // If there's a collision on X-axis
-  const directionX = newX - player.x;
-  if (directionX > 0) {  // Moving right
-    newX = player.x;  // Stop at current position
-  } else if (directionX < 0) {  // Moving left
-    newX = player.x;  // Stop at current position
-  }
-}
+//   // Handle X-axis collision
+// if (maxDistanceX !== Infinity) {  // If there's a collision on X-axis
+//   const directionX = newX - player.x;
+//   if (directionX > 0) {  // Moving right
+//     newX = player.x;  // Stop at current position
+//   } else if (directionX < 0) {  // Moving left
+//     newX = player.x;  // Stop at current position
+//   }
+// }
 
-// Handle Y-axis collision
-if (maxDistanceY !== Infinity) {  // If there's a collision on Y-axis
-  const directionY = newY - player.y;
-  if (directionY > 0) {  // Moving down
-    newY = player.y;  // Stop at current position
-  } else if (directionY < 0) {  // Moving up
-    newY = player.y;  // Stop at current position
-  }
-}
+// // Handle Y-axis collision
+// if (maxDistanceY !== Infinity) {  // If there's a collision on Y-axis
+//   const directionY = newY - player.y;
+//   if (directionY > 0) {  // Moving down
+//     newY = player.y;  // Stop at current position
+//   } else if (directionY < 0) {  // Moving up
+//     newY = player.y;  // Stop at current position
+//   }
+// }
 
 
 
             
-                    // old // Check collisions with obstacles
-                    // const collidesWithObstacle = checkObstacleCollisions(
-                    //     player, 
-                    //     newX, 
-                    //     newY, 
-                    //     scaledObstacles, 
-                    //     size
-                    // );
+//                     // old // Check collisions with obstacles
+//                     // const collidesWithObstacle = checkObstacleCollisions(
+//                     //     player, 
+//                     //     newX, 
+//                     //     newY, 
+//                     //     scaledObstacles, 
+//                     //     size
+//                     // );
             
-                    // Check collisions with other players
-                    const collidesWithPlayer = players.some(otherPlayer => 
-                        player.id !== otherPlayer.id && 
-                        checkCollision(
-                            { ...player, x: newX, y: newY }, 
-                            otherPlayer, 
-                            size
-                        )
-                    );
+//                     // Check collisions with other players
+//                     const collidesWithPlayer = players.some(otherPlayer => 
+//                         player.id !== otherPlayer.id && 
+//                         checkCollision(
+//                             { ...player, x: newX, y: newY }, 
+//                             otherPlayer, 
+//                             size
+//                         )
+//                     );
 
        
-                    console.log('collidesWithPlayer', collidesWithPlayer)
-                    // Update position if no collisions
-                    console.log('collidesWithObstacle', maxDistanceX < player.speed || maxDistanceY < player.speed);
-                    console.log('collidesWithPlayer', collidesWithPlayer);
-                    // Update position if no collisions
-                    if ((maxDistanceX >= player.speed || maxDistanceY >= player.speed) && !collidesWithPlayer) {
-                      player.x = Math.max(0, Math.min(newX, size - player.size));
-                      player.y = Math.max(0, Math.min(newY, size - player.size));
+//                     console.log('collidesWithPlayer', collidesWithPlayer)
+//                     // Update position if no collisions
+//                     console.log('collidesWithObstacle', maxDistanceX < player.speed || maxDistanceY < player.speed);
+//                     console.log('collidesWithPlayer', collidesWithPlayer);
+//                     // Update position if no collisions
+//                     if ((maxDistanceX >= player.speed || maxDistanceY >= player.speed) && !collidesWithPlayer) {
+//                       player.x = Math.max(0, Math.min(newX, size - player.size));
+//                       player.y = Math.max(0, Math.min(newY, size - player.size));
               
-                      // Publish the updated position to other players
-                      gameDataServiceRef.current?.sendMessage('playerUpdate', {
-                        playerId: player.id,
-                        x: player.x,
-                        y: player.y,
-                      });
-                    }
+//                       // Publish the updated position to other players
+//                       gameDataServiceRef.current?.sendMessage('playerUpdate', {
+//                         playerId: player.id,
+//                         x: player.x,
+//                         y: player.y,
+//                       });
+//                     }
 
 
 
-                    // old
-                    // if (!collidesWithObstacle && !collidesWithPlayer) {
-                    //     player.x = Math.max(0, Math.min(newX, size - player.size));
-                    //     player.y = Math.max(0, Math.min(newY, size - player.size));
+//                     // old
+//                     // if (!collidesWithObstacle && !collidesWithPlayer) {
+//                     //     player.x = Math.max(0, Math.min(newX, size - player.size));
+//                     //     player.y = Math.max(0, Math.min(newY, size - player.size));
             
-                    //     // Publish the updated position to other players
-                    //     // gameDataService.publishEvent(`/game/${currentRoom.id}/players`, {
-                    //     //     playerId: player.id,
-                    //     //     x: player.x,
-                    //     //     y: player.y
-                    //     // });
-                    // }
+//                     //     // Publish the updated position to other players
+//                     //     // gameDataService.publishEvent(`/game/${currentRoom.id}/players`, {
+//                     //     //     playerId: player.id,
+//                     //     //     x: player.x,
+//                     //     //     y: player.y
+//                     //     // });
+//                     // }
             
-                    // Check for collectible collection
-                    checkCollectibleCollection(player, true);
-                });
+//                     // Check for collectible collection
+//                     checkCollectibleCollection(player, true);
+//                 });
             
-            }, [size, checkCollectibleCollection, currentRoom?.id]);
+//             }, [size, checkCollectibleCollection, currentRoom?.id]);
             
 
     return (
