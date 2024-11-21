@@ -24,7 +24,7 @@ interface GameBoardProps {
 
     // const animationFrameId = useRef(null);
     const lastUpdateTimeRef = useRef(0);
-    const updateInterval = 1000 / 20; // 20 times per second
+    const updateInterval = 3000 / 1; // 20 times per second
   
 
   

@@ -11,11 +11,10 @@ import ChatModal from '@/app/components/ChatModal';
 import { getCurrentUser } from 'aws-amplify/auth';
 import { GameBoard } from '@/app/components/GameBoard/GameBoardv2';
 import { useFullGameSize } from '@/app/local-game/hooks/useFullGameSize';
-import { checkCollision, checkObstacleCollisions, getScaledValue } from '@/app/local-game/utils/gameUtils';
+import { checkCollision, checkObstacleCollisions, checkObstacleCollisionsv2, getScaledValue } from '@/app/local-game/utils/gameUtils';
 import { baseObstacles } from './baseObstacles';
  import GameDataService  from '@/app/services/gameDataService';
 
-// import { playerService } from '@/app/services/playerService';
 
 
 type Player = {
@@ -36,7 +35,6 @@ export default function RoomPage({ params }: { params: { id: string } }) {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [owner, setOwner] = useState('');
     const [admin, setAdmin] = useState(false);
-    const [players, setPlayers] = useState<any[]>([]);
     // Use useRef for players instead of useState
     const playersRef = useRef<Player[]>([]);
     const size = useFullGameSize();
@@ -83,12 +81,8 @@ export default function RoomPage({ params }: { params: { id: string } }) {
             return
         }
         const loadRoom = async () => {
-            console.log('currentRoom', currentRoom)
-            console.log('params', params)
             try {
-
                 let room = (await roomService.getRoomsBySimpleCode(params.id)).data[0];
-                console.log('room', room)
                 if (!room) {
                     // Room not found, redirect back to online-game
                     router.push('/online-game');
@@ -102,17 +96,18 @@ export default function RoomPage({ params }: { params: { id: string } }) {
                 if (!room.players?.includes(owner)) {
                     const players: any[] = room.players ? room.players : [];
                     room = (await roomService.joinRoom(room.id, [...players, owner])).data[0];
-                    console.log('aye')
-                    console.log('room', room)
-                   
-            }
+                }
 
             if(!playersRef.current.some(player => player.id === owner)) {
-                playersRef.current.push({ id: owner, x: 0, y: 0, size: getScaledValue(50, size), color: 'blue', speed: 5 });
+                playersRef.current.push({ id: owner, x: 0, y: 0, size: 50, color: 'blue', speed: 15 });
             }
-                // add owner to player  ref: 
-
-
+ 
+            // get playerRef from the current room
+            // const i = playersRef.current.findIndex((player: any) => player.id === owner);
+            // if(i !== -1) { 
+            //     playersRef.current[i].size = getScaledValue(50, size);
+            //     playersRef.current[i].speed = getScaledValue(15, size);
+            // }
                 dispatch(setCurrentRoom(room));
             } catch (error) {
                 console.error('Error loading room:', error);
@@ -125,27 +120,13 @@ export default function RoomPage({ params }: { params: { id: string } }) {
         // Cleanup when leaving the room
         return () => {
             dispatch(setCurrentRoom(null));
+
+            if (gameDataServiceRef.current) {
+                gameDataServiceRef.current.getMessageSubject()//?//.unsubscribe();
+                gameDataServiceRef.current = null;
+              }
         };
     }, [params.id, dispatch, router]);
-
-    // Add an effect for player updates subscription
-    // In your RoomPage component
-useEffect(() => {
-
-   const  updatePlayersSize = (size: number) => {
-        playersRef.current.forEach(player => {
-            player.size = getScaledValue(50, size);
-            player.speed = getScaledValue(5, size);
-        });
-        setPlayers([...playersRef.current]);
-    }
-
-    updatePlayersSize(size);
-
-}, [size]);
-
-
-
 
 
     useEffect(() => {
@@ -179,7 +160,8 @@ useEffect(() => {
                 height: getScaledValue(obstacle.height, size),
                 color: obstacle.color
             }))
-            , [size, baseObstacles]);
+            , [size]);
+
     
             const handleGameTick = useCallback(() => {
                 const players = playersRef.current;
@@ -193,8 +175,6 @@ useEffect(() => {
                 
                     if (player.id !== currentUserId) return;
 
-                    
-            
                     // Calculate new position based on keys pressed
                     let newX = player.x;
                     let newY = player.y;
@@ -206,16 +186,47 @@ useEffect(() => {
                     if (keys.w) newY -= player.speed;
 
                         // Calculate player size based on the current size
+                        player.size = getScaledValue(50, size);
+
+                           // Check collisions with obstacles
+      const { x: maxDistanceX, y: maxDistanceY } = checkObstacleCollisionsv2(
+        player,
+        newX,
+        newY,
+        scaledObstacles,
+      );
+
+  // Handle X-axis collision
+if (maxDistanceX !== Infinity) {  // If there's a collision on X-axis
+  const directionX = newX - player.x;
+  if (directionX > 0) {  // Moving right
+    newX = player.x;  // Stop at current position
+  } else if (directionX < 0) {  // Moving left
+    newX = player.x;  // Stop at current position
+  }
+}
+
+// Handle Y-axis collision
+if (maxDistanceY !== Infinity) {  // If there's a collision on Y-axis
+  const directionY = newY - player.y;
+  if (directionY > 0) {  // Moving down
+    newY = player.y;  // Stop at current position
+  } else if (directionY < 0) {  // Moving up
+    newY = player.y;  // Stop at current position
+  }
+}
+
+
 
             
-                    // Check collisions with obstacles
-                    const collidesWithObstacle = checkObstacleCollisions(
-                        player, 
-                        newX, 
-                        newY, 
-                        scaledObstacles, 
-                        size
-                    );
+                    // old // Check collisions with obstacles
+                    // const collidesWithObstacle = checkObstacleCollisions(
+                    //     player, 
+                    //     newX, 
+                    //     newY, 
+                    //     scaledObstacles, 
+                    //     size
+                    // );
             
                     // Check collisions with other players
                     const collidesWithPlayer = players.some(otherPlayer => 
@@ -227,20 +238,38 @@ useEffect(() => {
                         )
                     );
 
-                    console.log('collidesWithObstacle', collidesWithObstacle)
+       
                     console.log('collidesWithPlayer', collidesWithPlayer)
                     // Update position if no collisions
-                    if (!collidesWithObstacle && !collidesWithPlayer) {
-                        player.x = Math.max(0, Math.min(newX, size - player.size));
-                        player.y = Math.max(0, Math.min(newY, size - player.size));
-            
-                        // Publish the updated position to other players
-                        // playerService.publishEvent(`/game/${currentRoom.id}/players`, {
-                        //     playerId: player.id,
-                        //     x: player.x,
-                        //     y: player.y
-                        // });
+                    console.log('collidesWithObstacle', maxDistanceX < player.speed || maxDistanceY < player.speed);
+                    console.log('collidesWithPlayer', collidesWithPlayer);
+                    // Update position if no collisions
+                    if ((maxDistanceX >= player.speed || maxDistanceY >= player.speed) && !collidesWithPlayer) {
+                      player.x = Math.max(0, Math.min(newX, size - player.size));
+                      player.y = Math.max(0, Math.min(newY, size - player.size));
+              
+                      // Publish the updated position to other players
+                      gameDataServiceRef.current?.sendMessage('playerUpdate', {
+                        playerId: player.id,
+                        x: player.x,
+                        y: player.y,
+                      });
                     }
+
+
+
+                    // old
+                    // if (!collidesWithObstacle && !collidesWithPlayer) {
+                    //     player.x = Math.max(0, Math.min(newX, size - player.size));
+                    //     player.y = Math.max(0, Math.min(newY, size - player.size));
+            
+                    //     // Publish the updated position to other players
+                    //     // gameDataService.publishEvent(`/game/${currentRoom.id}/players`, {
+                    //     //     playerId: player.id,
+                    //     //     x: player.x,
+                    //     //     y: player.y
+                    //     // });
+                    // }
             
                     // Check for collectible collection
                     checkCollectibleCollection(player, true);
